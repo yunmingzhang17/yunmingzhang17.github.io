@@ -1,11 +1,10 @@
 ---
 layout: post
-title: Simit - A language for computing on sparse systems
+title: GraphIt - A High-Performance Graph Domain Specific Language
 ---
 
-<meta name="Description" content="Simit is a programming language for computing
-on sparse systems using linear algebra. Programs are short, readable,
-performant and portable (CPU and GPU).">
+<meta name="Description" content="GraphIt - A High-
+Performance Graph Domain Specific Language">
 
 Simit is a new programming language that makes it easy to compute on sparse
 systems using linear algebra.  Simit programs are typically shorter than Matlab
@@ -37,13 +36,4 @@ Simit is open source, under a [commercially permissive MIT
 license](https://github.com/simit-lang/simit/blob/master/LICENSE). We encourage
 you to use it in open source or commercial projects!
 
-**Tensor Algebra Compiler**: We are building a sparse linear/tensor algebra compiler to serve as a new engine for Simit, so that we improve performance and add new features such as support for constraints and tensors.
-The tensor algebra compiler will also be available as a standalone C++ sparse linear/tensor algebra library.
-For more information go to [tensor-compiler.org](http://tensor-compiler.org).
 
-To learn more about the Simit programming model check out our [TOG 2016
-paper](tog16).
-<iframe width="500" height="281" src="{{site.data.papers.tog16.movie}}" frameborder="0" allowfullscreen></iframe>
-
-Or see a talk about Simit at Microsoft Research:
-<iframe width="500" height="281" src="https://www.youtube.com/embed/raPkxhHy5ro" frameborder="0" allowfullscreen></iframe>
