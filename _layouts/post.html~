@@ -28,7 +28,7 @@
     <div class="wrapper">
       <header>
         <a href="index"><h1 class="title"> GraphIt</h1></a>
-        <p>A language for computing on sparse systems</p>
+        <p>A high-performance graph domain specific language</p>
         <ul>
           <li><a href="http://github.com/simit-lang/simit">View On <strong>GitHub</strong></a></li>
           <li><a href="http://builds.simit-lang.org">Continuous<strong>Build Status</strong></a></li>
@@ -36,12 +36,13 @@
         <p><a href="getting-started">Getting Started</a></p>
         <p><a href="language">Language Manual</a></p>
         <p><a href="publications">Publications</a></p>
+	<p><a href="user-group">User Group</a></p>
       </header>
       <footer>
-        <p><a href="http://people.csail.mit.edu/fred/">Fredrik Kjolstad</a> <br>fred at mit dot edu</p>
+        <p><a href="https://yunmingzhang.wordpress.com/">Yunming Zhang</a> <br>yunming at mit dot edu</p>
         <p><small>Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
       </footer>
-      <section class="language-simit">
+      <section class="language-graphit">
       {{ content }}
       </section>
     </div>
