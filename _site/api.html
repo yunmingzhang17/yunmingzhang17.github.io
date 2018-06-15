@@ -1,0 +1,251 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>The Simit C++ API</title>
+    
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="stylesheets/prism.css" />
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-40269412-1']);
+      _gaq.push(['_setDomainName', 'simit-lang.org']);
+      _gaq.push(['_setAllowLinker', true]);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <a href="index"><h1 class="title"> GraphIt</h1></a>
+        <p>A high-performance graph domain specific language</p>
+        <ul>
+          <li><a href="http://github.com/simit-lang/simit">View On <strong>GitHub</strong></a></li>
+          <li><a href="http://builds.simit-lang.org">Continuous<strong>Build Status</strong></a></li>
+        </ul>
+        <p><a href="getting-started">Getting Started</a></p>
+        <p><a href="language">Language Manual</a></p>
+        <p><a href="publications">Publications</a></p>
+	<p><a href="user-group">User Group</a></p>
+      </header>
+      <footer>
+        <p><a href="https://yunmingzhang.wordpress.com/">Yunming Zhang</a> <br>yunming at mit dot edu</p>
+        <p><small>Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+      <section class="language-graphit">
+      <h1 id="the-simit-c-api">The Simit C++ API</h1>
+
+<p>The Simit C++ API is the means for interacting with Simit. It’s design is
+similar to the OpenGL API, where meshes are replaced by graphs and shaders by
+Simit programs. The Simit C++ API consists of two main parts: a Set API for
+assembling graphs, and an API for loading, compiling and running Simit program
+on those graphs. The Simit APIs lives in the <code class="highlighter-rouge">simit::</code> namespace.</p>
+
+<h2 id="graph-api--graphh">Graph API  (<a href="https://github.com/simit-lang/simit/blob/master/src/graph.h">graph.h</a>)</h2>
+<p>The Simit Graph API lets you construct graphs from sets, add elements to those
+sets and write data to those elements. The main class is <code class="highlighter-rouge">Set</code>:</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Set</span> <span class="n">points</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>A Simit set may be an edge set that connects other sets. The <code class="highlighter-rouge">Set</code> constructor
+can take a variable number of <code class="highlighter-rouge">Set</code> arguments that the resulting set connects:</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Set</span> <span class="n">springs</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">points</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>The next step is to add one or more field to the set. Adding a field to a set
+means that every element added to the set has that field. To add a field <code class="highlighter-rouge">m</code>
+that contains the mass of each spring we use the <code class="highlighter-rouge">simit::Set::addField</code> method:</p>
+
+<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">FieldRef</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">m</span> <span class="o">=</span> <span class="n">springs</span><span class="p">.</span><span class="n">addField</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="s">"m"</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>The field name <code class="highlighter-rouge">m</code> is given as an argument. However, you must specify the field
+type (a <code class="highlighter-rouge">double</code> per set element) using template arguments. The API also
+supports <code class="highlighter-rouge">bool</code>, <code class="highlighter-rouge">int</code> and <code class="highlighter-rouge">float</code> fields.</p>
+
+<p>We can also specify vector and matrix fields using additional template
+arguments:</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Create a field with a 3-vector per set element
+</span><span class="n">FieldRef</span><span class="o">&lt;</span><span class="kt">double</span><span class="p">,</span><span class="mi">3</span><span class="o">&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">springs</span><span class="p">.</span><span class="n">addField</span><span class="o">&lt;</span><span class="kt">double</span><span class="p">,</span><span class="mi">3</span><span class="o">&gt;</span><span class="p">(</span><span class="s">"x"</span><span class="p">);</span>
+
+<span class="c1">// Create a field with a 3x3 matrix per set element
+</span><span class="n">FieldRef</span><span class="o">&lt;</span><span class="kt">float</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="o">&gt;</span> <span class="n">B</span> <span class="o">=</span> <span class="n">springs</span><span class="p">.</span><span class="n">addField</span><span class="o">&lt;</span><span class="kt">float</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="o">&gt;</span><span class="p">(</span><span class="s">"B"</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>To add elements to a set you use the <code class="highlighter-rouge">Set::add</code> method:</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ElementRef</span> <span class="n">p1</span> <span class="o">=</span> <span class="n">points</span><span class="p">.</span><span class="n">add</span><span class="p">();</span>
+<span class="n">ElementRef</span> <span class="n">p2</span> <span class="o">=</span> <span class="n">points</span><span class="p">.</span><span class="n">add</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p>If the set is an edge set then you must pass the endpoints to the edge element
+to the <code class="highlighter-rouge">add</code> method:</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ElementRef</span> <span class="n">s1</span> <span class="o">=</span> <span class="n">springs</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>To write to the field of an element you can use the <code class="highlighter-rouge">FieldRef::set</code> method:</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Set the m field of spring s
+</span><span class="n">m</span><span class="p">.</span><span class="n">set</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>This may look very strange to C++ programmers who are used to object-oriented
+semantics where you write to the field of an object (<code class="highlighter-rouge">s1.m</code>) instead of the
+object of a field (<code class="highlighter-rouge">m(s1)</code>).  However, it is consistent with the Simit way
+where elements belong to a set and with physical thinking where a field is
+defined over a system/mesh/lattice.</p>
+
+<p>A more convenient syntax to set a field uses parentheses:</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">m</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>You can also the field of an element you use parentheses:</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">m</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">m</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>The type of accessing the field of an object is a <code class="highlighter-rouge">simit::TensorRef</code> (a tensor
+is a generalization of scalars (0 dimensions), vectors (1 dimension) and
+matrices (2 dimensions) to any number of dimensions. The <code class="highlighter-rouge">TensorRef</code> is a
+reference to the data of that field for that element and has the same template
+arguments as the field.</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">TensorRef</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">m1</span> <span class="o">=</span> <span class="n">m</span><span class="p">(</span><span class="n">s1</span><span class="p">);</span>
+<span class="n">TensorRef</span><span class="o">&lt;</span><span class="kt">double</span><span class="p">,</span><span class="mi">3</span><span class="o">&gt;</span> <span class="n">x1</span> <span class="o">=</span> <span class="n">x</span><span class="p">(</span><span class="n">p1</span><span class="p">);</span>
+<span class="n">TensorRef</span><span class="o">&lt;</span><span class="kt">double</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="o">&gt;</span> <span class="n">B1</span> <span class="o">=</span> <span class="n">B</span><span class="p">(</span><span class="n">s1</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>You can print <code class="highlighter-rouge">TensorRef</code> objects like any other Simit C++ object:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>std::cout &lt;&lt; B1 &lt;&lt; std::endl;
+</code></pre></div></div>
+
+<p>To read or write a component of a non-scalar <code class="highlighter-rouge">TensorRef</code> use zero-indexed
+parentheses syntax:</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x1</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">=</span> <span class="mf">3.0</span><span class="p">;</span>
+<span class="n">B1</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">;</span>
+
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">x1</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>    <span class="c1">// 3.0
+</span><span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">B1</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>  <span class="c1">// 10.0
+</span></code></pre></div></div>
+
+<p>You can also use C++ initializer lists to set the value of a non-scalar
+<code class="highlighter-rouge">TensorRef</code>:</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x1</span> <span class="o">=</span> <span class="p">{</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">};</span>
+<span class="n">B1</span> <span class="o">=</span> <span class="p">{</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span>
+      <span class="mf">4.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">,</span>
+      <span class="mf">7.0</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">,</span> <span class="mf">9.0</span><span class="p">};</span>
+</code></pre></div></div>
+
+<p>Finally, you can iterate over the elements in a set. Note that since it is a
+set no order is guaranteed (including insertion order):</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// C++ 11 foreach syntax
+</span><span class="k">for</span> <span class="p">(</span><span class="n">simit</span><span class="o">::</span><span class="n">ElementRef</span> <span class="n">p</span> <span class="o">:</span> <span class="n">points</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">p</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// Iterator syntax
+</span><span class="k">for</span> <span class="p">(</span><span class="n">simit</span><span class="o">::</span><span class="n">Set</span><span class="o">::</span><span class="n">ElementIterator</span> <span class="n">p</span> <span class="o">=</span> <span class="n">points</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span> <span class="n">it</span> <span class="o">!=</span> <span class="n">points</span><span class="p">.</span><span class="n">end</span><span class="p">();</span> <span class="o">++</span><span class="n">p</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">p</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="program-api--programh">Program API  (<a href="https://github.com/simit-lang/simit/blob/master/src/program.h">program.h</a>)</h2>
+
+<p>The Simit Program API lets you:</p>
+
+<ul>
+  <li>Load Simit source code from strings and files into a <code class="highlighter-rouge">Program</code> object,</li>
+  <li>Compile functions in the Simit source code to executable <code class="highlighter-rouge">Function</code> objects,</li>
+  <li>Bind set arguments of <code class="highlighter-rouge">Function</code> objects to <code class="highlighter-rouge">Set</code> data structures, and</li>
+  <li>Initialize and execute <code class="highlighter-rouge">Function</code> objects.</li>
+</ul>
+
+<p>A <code class="highlighter-rouge">Program</code> represents a Simit program:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Program program;
+</code></pre></div></div>
+
+<p>You can load source code into a <code class="highlighter-rouge">Program</code> object from a string or a file:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>program.loadString(programString);
+program.loadFile(programFilename);
+</code></pre></div></div>
+
+<p>After you have loaded source code into your <code class="highlighter-rouge">Program</code> object you can compile
+any exported function (funcs in the Simit code prefixed with the <code class="highlighter-rouge">export</code>
+modifier):</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Function newton_method = program.compile("newton_method");
+</code></pre></div></div>
+
+<p>A <code class="highlighter-rouge">Function</code> object is a runnable object (a functor). Before we execute it we
+must bind the arguments of the Simit function and any global <code class="highlighter-rouge">extern</code> variables
+in the Simit program to C++ data structures. The following statement binds the
+C++ <code class="highlighter-rouge">points</code> object to the <code class="highlighter-rouge">extern points</code> set in the Simit source code:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>newton_method.bind("points", &amp;points);
+</code></pre></div></div>
+
+<p>Once all the arguments to the Simit function and all the global <code class="highlighter-rouge">extern</code>
+variables has been bound we can execute the function using the
+<code class="highlighter-rouge">simit::Function::runSafe</code> method:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>newton_method.runSafe();
+</code></pre></div></div>
+
+<p>The <code class="highlighter-rouge">runSafe</code> method lazily initializes the function if necessary, and
+maps/unmaps arguments between function calls. For better and more predictable
+performance you can manage manage this yourself. For example, if you want to
+execute the function 10 times with the same arguments you only have to
+initialize once:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>newton_method.init();
+for (int i=0; i&lt;10; ++i) {
+  newton_method.unmapArgs();
+  newton_method.run();
+  newton_method.mapArgs();
+}
+</code></pre></div></div>
+
+<p>The <code class="highlighter-rouge">unmapArgs</code> and <code class="highlighter-rouge">mapArgs</code> make the bound arguments (e.g. a <code class="highlighter-rouge">Set</code> object)
+respectively unavailable and available to your C++ program. For example, if you
+are running your program on a GPU then <code class="highlighter-rouge">unmapArgs</code> will copy your data
+structures to GPU memory (i.e. unmap them from your local memory space) and
+<code class="highlighter-rouge">mapArgs</code> will copy the data structure back to CPU memory.</p>
+
+      </section>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    <script src="javascripts/prism.js"></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-79370201-1', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+  </body>
+</html>

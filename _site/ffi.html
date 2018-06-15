@@ -1,0 +1,249 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Simit FFI</title>
+    
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="stylesheets/prism.css" />
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-40269412-1']);
+      _gaq.push(['_setDomainName', 'simit-lang.org']);
+      _gaq.push(['_setAllowLinker', true]);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <a href="index"><h1 class="title"> GraphIt</h1></a>
+        <p>A high-performance graph domain specific language</p>
+        <ul>
+          <li><a href="http://github.com/simit-lang/simit">View On <strong>GitHub</strong></a></li>
+          <li><a href="http://builds.simit-lang.org">Continuous<strong>Build Status</strong></a></li>
+        </ul>
+        <p><a href="getting-started">Getting Started</a></p>
+        <p><a href="language">Language Manual</a></p>
+        <p><a href="publications">Publications</a></p>
+	<p><a href="user-group">User Group</a></p>
+      </header>
+      <footer>
+        <p><a href="https://yunmingzhang.wordpress.com/">Yunming Zhang</a> <br>yunming at mit dot edu</p>
+        <p><small>Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+      <section class="language-graphit">
+      <h1 id="the-simit-foreign-function-interface">The Simit Foreign Function Interface</h1>
+<p><strong><em>These pages are under construction</em></strong></p>
+
+<p>The Simit Foreign Function Interface (ffi) lets Simit code call functions
+written in C.  The <code class="highlighter-rouge">extern</code> keyword is used to call C functions. Extern
+functions can accept or return any number of Simit scalar, vector and matrix
+arguments. Passing elements or sets to extern functions is not supported. The
+argument list of the C function must contain all the Simit arguments followed
+by the result arguments, which are passed in using a pointer. A vector and
+matrix argument passed into an extern function must be matched by one or more
+arguments describing the vector or matrix type (e.g. it’s size) followed by one
+argument for its value.</p>
+
+<p>The following declares a function <code class="highlighter-rouge">printscalar</code> written in C and linked to the
+program:</p>
+
+<pre><code class="language-simit">extern func printInt(a : int);
+
+export func main()
+  i : int = 2;
+  printInt(i);
+end
+</code></pre>
+
+<p>The C function <code class="highlighter-rouge">printInt</code> can be defined as follows:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">printInt</span><span class="p">(</span><span class="kt">int</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">"%d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">a</span><span class="p">);</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>  <span class="c1">// Return success error code
+</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Since the argument is a scalar it is passed by value. The functions returns an
+error code (0 for success, any other value for failure). A failure causes an
+exception to be thrown from <code class="highlighter-rouge">simit::Function::run</code>.</p>
+
+<p>The next example declares and calls a function that prints a vector.</p>
+
+<pre><code class="language-simit">extern func printVector(a : vector[3](int));
+
+export func main()
+  vec : vector[3](int) = [1, 2, 3];
+  printVector(vec);
+end
+</code></pre>
+
+<p>The C function is defined as follows</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">printVector</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">int</span><span class="o">*</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">"[%d"</span><span class="p">,</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">", %d"</span><span class="p">,</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+  <span class="p">}</span>
+  <span class="n">printf</span><span class="p">(</span><span class="s">"]</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>  <span class="c1">// Return success error code
+</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Vector arguments in Simit becomes two arguments in C: the vector’s size and a
+pointer to its values.</p>
+
+<p>The table lists the required C formal arguments for dense Simit vectors and
+matrices. In the following all Simit floats are double precision, <code class="highlighter-rouge">V</code> refers to
+a Simit set, and <code class="highlighter-rouge">3</code> can be replaced by any number.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Simit Actual</th>
+      <th>C Formal</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="highlighter-rouge">int</code></td>
+      <td><code class="highlighter-rouge">int</code></td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">vector[3](float)</code></td>
+      <td><code class="highlighter-rouge">int, double*</code></td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">vector[V](float)</code></td>
+      <td><code class="highlighter-rouge">int, double*</code></td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">vector[V](vector[3](float))</code></td>
+      <td><code class="highlighter-rouge">int, int, double*</code></td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">matrix[3,3](float)</code></td>
+      <td><code class="highlighter-rouge">int, int, double*</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The blocked types have two sets of type arguments. The first set describes the
+number of blocks in each dimension (one for vector, two for matrices). The
+second set describes the size of each block in each dimension.</p>
+
+<p>The next table lists the C formal arguments for sparse Simit matrices:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Simit Actual</th>
+      <th>C Formal</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="highlighter-rouge">matrix[V,V](float)</code></td>
+      <td><code class="highlighter-rouge">int, int, int*, int*, double*</code></td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">matrix[V,V](matrix[3,3](float))</code></td>
+      <td><code class="highlighter-rouge">int, int, int*, int*, int, int, double*</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>[…]</p>
+
+<p>This table lists the required C formal arguments for dense Simit
+function results (return values):</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Simit</th>
+      <th>C</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="highlighter-rouge">int</code></td>
+      <td><code class="highlighter-rouge">int*</code></td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">vector[3](float)</code></td>
+      <td><code class="highlighter-rouge">int, double*</code></td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">vector[V](float)</code></td>
+      <td><code class="highlighter-rouge">int, double*</code></td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">matrix[3,3](float)</code></td>
+      <td><code class="highlighter-rouge">int, int, double*</code></td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">vector[V](vector[3](float))</code></td>
+      <td><code class="highlighter-rouge">int, int, double*</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The final table lists the required C formal arguments for sparse Simit function
+results:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Simit</th>
+      <th>C</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="highlighter-rouge">matrix[V,V](float)</code></td>
+      <td><code class="highlighter-rouge">int, int, int**, int**, double**</code></td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">matrix[V,V](matrix[3,3](float))</code></td>
+      <td><code class="highlighter-rouge">int, int, int**, int**, int, int, double**</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The (rowPtr and colIdx) indices and value arrays of sparse matrices are passed
+as pointer-pointers.  The reason for this is that Simit cannot know the number
+of non-zeroes or the non-zero distribution of the matrix.  The memory of sparse
+matrices must therefore be allocated by the user using <code class="highlighter-rouge">simit_malloc</code>.
+However, Simit will free the arrays when they the scope they were allocated in
+closes.</p>
+
+<p>[TODO: Add code example]</p>
+
+      </section>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    <script src="javascripts/prism.js"></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-79370201-1', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+  </body>
+</html>
