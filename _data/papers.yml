@@ -1,31 +1,9 @@
-tog16:
+graphit:
   authors:
-    - fred
+    - yunming
+    - mengjiao
+    - riyadh
     - shoaib
-    - jrk
-    - dave
-    - shin
-    - desai
-    - etienne
-    - danny
-    - tej
-    - wojciech
+    - julian
     - saman
-  paper: http://groups.csail.mit.edu/commit/papers/2016/simit.pdf
-  image: http://groups.csail.mit.edu/commit/papers/2016/simit.jpg
-  movie: https://www.youtube.com/embed/tFlG3Ygpews
-
-tog16e:
-  authors:
-    - gilbert
-    - fred
-  paper: http://groups.csail.mit.edu/commit/papers/2016/why.pdf
-
-taco17:
-  authors:
-    - fred
-    - shoaib
-    - stephen
-    - lugato
-    - saman
-  paper: http://groups.csail.mit.edu/commit/papers/2017/tensor-compiler-techreport.pdf
+  link: https://arxiv.org/abs/1805.00923 
