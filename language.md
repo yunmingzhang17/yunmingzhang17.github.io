@@ -162,37 +162,21 @@ Note that the lower bound is _inclusive_ while the upper bound is _exclusive_
 omits 10.
 
 
-# Elements, VertexSets, EdgeSets, Vectors
+# Elements, Vectors, VertexSets, EdgeSets
 Elements, vertexsets, edgesets and vectors form GraphIt's _data model_.
 
 ## Elements
 An element is a type that stores one or more data fields, much like a struct in
-C/C++. For example, an element representing a point may store a position vector
-`x` and a velocity vector `v`, while an element represent a spring may store a
-scalar mass:
+C/C++. For example, a vertex in a social network representing a person can have a Person Element type. In the future, we plan to support fields in the Element. Currently, fields associated with an Element are expressed as separate Vectors descrived below. 
 
 ```
-element Point
-  x : vector[3](float);
-  v : vector[3](float);
-end
-
-element Element
-  m : float;
-  l : float;
+element Person
 end
 ```
 
-To read from or write to a field of an Element `e` or a Point `p`, you use the
-`.` operator:
+## Vectors
 
-```
-e.m = 2.0;
-print e.m;  % 2.0
 
-p.x = [0.0, 0.0, 1.0]';
-print p.x;  % [0.0, 0.0, 1.0]'
-```
 
 ## Sets
 Unlike C structs, elements live in sets. So Point elements must be stored in

@@ -60,8 +60,9 @@ programs.</p>
       <li><a href="#for-loops" id="markdown-toc-for-loops">For Loops</a></li>
     </ul>
   </li>
-  <li><a href="#elements-vertexsets-edgesets-vectors" id="markdown-toc-elements-vertexsets-edgesets-vectors">Elements, VertexSets, EdgeSets, Vectors</a>    <ul>
+  <li><a href="#elements-vectors-vertexsets-edgesets" id="markdown-toc-elements-vectors-vertexsets-edgesets">Elements, Vectors, VertexSets, EdgeSets</a>    <ul>
       <li><a href="#elements" id="markdown-toc-elements">Elements</a></li>
+      <li><a href="#vectors" id="markdown-toc-vectors">Vectors</a></li>
       <li><a href="#sets" id="markdown-toc-sets">Sets</a></li>
       <li><a href="#edge-sets" id="markdown-toc-edge-sets">Edge Sets</a></li>
     </ul>
@@ -202,35 +203,18 @@ end
 (like Python), so the above example prints all integers between 0 and 9 but
 omits 10.</p>
 
-<h1 id="elements-vertexsets-edgesets-vectors">Elements, VertexSets, EdgeSets, Vectors</h1>
+<h1 id="elements-vectors-vertexsets-edgesets">Elements, Vectors, VertexSets, EdgeSets</h1>
 <p>Elements, vertexsets, edgesets and vectors form GraphIt’s <em>data model</em>.</p>
 
 <h2 id="elements">Elements</h2>
 <p>An element is a type that stores one or more data fields, much like a struct in
-C/C++. For example, an element representing a point may store a position vector
-<code class="highlighter-rouge">x</code> and a velocity vector <code class="highlighter-rouge">v</code>, while an element represent a spring may store a
-scalar mass:</p>
+C/C++. For example, a vertex in a social network representing a person can have a Person Element type. In the future, we plan to support fields in the Element. Currently, fields associated with an Element are expressed as separate Vectors descrived below.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>element Point
-  x : vector[3](float);
-  v : vector[3](float);
-end
-
-element Element
-  m : float;
-  l : float;
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>element Person
 end
 </code></pre></div></div>
 
-<p>To read from or write to a field of an Element <code class="highlighter-rouge">e</code> or a Point <code class="highlighter-rouge">p</code>, you use the
-<code class="highlighter-rouge">.</code> operator:</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>e.m = 2.0;
-print e.m;  % 2.0
-
-p.x = [0.0, 0.0, 1.0]';
-print p.x;  % [0.0, 0.0, 1.0]'
-</code></pre></div></div>
+<h2 id="vectors">Vectors</h2>
 
 <h2 id="sets">Sets</h2>
 <p>Unlike C structs, elements live in sets. So Point elements must be stored in
