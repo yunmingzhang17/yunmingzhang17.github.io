@@ -6,31 +6,31 @@ Getting Started
 ===============
  
 ## Downloading software
-Make sure you have all the correct Open Source Software installed. Things you need can be found in the [README](https://github.com/yunmingzhang17/graphit) file at the GitHub Website. You will need either CILK or OPENMV to allow you to run the C++ code in parallel. If you dont have either you can get both by simply downloading [GCC](https://gcc.gnu.org/). Alternatively if you already have CILK or OPENMV you can use those too. This tutorial will go through how to use GraphIt via both CILK and OPENMV.
+Make sure you have all the correct Open Source Software installed. Things you need can be found in the [README](https://github.com/yunmingzhang17/graphit) file at the GitHub Website. You will need either CILK or OPENMP to allow you to run the C++ code in parallel. If you dont have either you can get both by simply downloading [GCC](https://gcc.gnu.org/). Alternatively if you already have CILK or OPENMP you can use those too. This tutorial will go through how to use GraphIt via both CILK and OPENMP.
         
 ## Cloning graphit
 Clone graphit by going to [GraphIt](https://github.com/yunmingzhang17/graphit)
         <p class="caption"> *Something to note for the following tutorial.*</p>
-        <p class="caption"> Everything will be done graphit/build/bin </p>
+        <p class="caption"> *Everything will be done graphit/build/bin* </p>
    
-## Basic Variables, Constructs, and Functions</h2>
+## Basic Variables, Constructs, and Functions
 If you have not yet already please read the basic information on the [GraphIt Language.](language)
 
-## PageRankDelta Example</h2>
+### PageRankDelta Example
 <img src="gallery/PageRankDeltaCode.png" alt="Page Rank Delta Code using GraphIt">
-<p class="caption">This is the code of Page Rank Delta using Graphit </p>
+<p class="caption">*This is the code of Page Rank Delta using Graphit*</p>
 
 Here we will go through an example of GraphIt Code using Page Rank Delta as an example. You can find this file under your graphit/apps folder 
 Additionally here is a link to the [GraphIt paper.](https://arxiv.org/pdf/1805.00923.pdf) Sections 4 and 5 give the complete breakdown of the Page Rank Delta code. Please look here if you want a more detailed breakdown of the functionality of Graphit.
 
 ###      Algorithm Explanatation
 <img src="gallery/PageRankDeltaElements1-2.png" alt="Page Rank Delta Code lines 1-2">
-<p class="caption">Page Rank Delta Code lines 1-2 </p>
+<p class="caption">*Page Rank Delta Code lines 1-2* </p>
 
 Here we construct the basic Elements that will be used by graphit. Most Graph Analysis Algorithms will require that you have both of these. GraphIt supports multiple types of user-defined vertices and edges, which is important for algorithms that work on multiple graphs.
 
 <img src="gallery/PageRankDeltaConst3-11.png" alt="Page Rank Delta Code lines 3-11">
-<p class="caption">Page Rank Delta Code lines 3-11 </p>
+<p class="caption">*Page Rank Delta Code lines 3-11* </p>
 
 [A quick refresher on Variables](#variables)
 
@@ -38,7 +38,7 @@ After defining element types, the programmer can construct vertexsets and edgese
 
 
 <img src="gallery/PageRankDeltaFuncs.png" alt="Page Rank Delta Code lines 12-27">
-<p class="caption">Page Rank Delta Code lines 12-27 </p>
+<p class="caption">*Page Rank Delta Code lines 12-27* </p>
 
 [A quick refresher on Functions](#functions)
 
@@ -46,7 +46,7 @@ Here we can create all the functions that we need to order to produce the functi
 
 
 <img src="gallery/PageRankDeltaMain.png" alt="Page Rank Delta Code lines 28-39">
-<p class="caption">Page Rank Delta Code lines 28-39 </p>
+<p class="caption">*Page Rank Delta Code lines 28-39* </p>
 
 This is where your program comes together and runs together with all the functions you created. What makes GraphIt great is that the language constructs of GraphIt separates edge processing logic from edge traversal, edge filtering (from, to, srcFilter, and dstFilter), atomic synchronization, and modified vertex deduplication and tracking logic (apply and applyModified). This separation enables the compiler to represent the algorithm from a high level, exposing opportunities for edge traversal and vertex data layout optimizations. Moreover, it frees the programmer from specifying low-level implementation details, such as synchronization and deduplication logic. 
 
@@ -56,7 +56,7 @@ Something you will note is the #s1# in the main function. This is something uniq
 
 ###      Scheduling Explanatation
 <img src="gallery/PageRankDeltaSchedule.png" alt="Page Rank Delta Schedule">
-<p class="caption">Page Rank Delta Code Schedule </p>
+<p class="caption">*Page Rank Delta Code Schedule* </p>
 
 We use labels (#label#) in algorithm specifications to identify the statements on which optimizations apply. Programmers can assign a label on the left side of a statement and later reference it in the scheduling language. Above shows a simple schedule for the PageRankDelta implementation. The programmer adds label s1 to the edgeset operation statement. After the schedule keyword, the programmer can make a series of calls with the scheduling functions.
 
@@ -87,12 +87,79 @@ Before we can compile Graphit you need to first follow these steps and build the
                 python test.py
                 python test_with_schedules.py
             </code></pre>
+### Compile GraphIt Programs
+<p class="caption">**For now all builds and compilations must be done in the graphit/build/bin directory due to linking and paths in the code. This will soon be updated so that users can compile anywhere but for now please do it in the bin.**</p>
 
+GraphIt compiler currently generates a C++ output file from the .gt input GraphIt programs. 
+To compile an input GraphIt file with schedules in the same file (assuming the build directory is in the root project directory) do the following. The -f denotes the input file and the -o denotes the output file. 
+```
+    cd build/bin
+    python graphitc.py -f (input file path) -o (output file name)
+    
+```
+
+The following is an example:
+```
+    cd build/bin
+    python graphitc.py -f ../../test/input/simple_vector_sum.gt -o test.cpp
+    
+```
+To compile an input algorithm file and another separate schedule file (some of the test files have hardcoded paths to test inputs, be sure to modify that or change the directory you run the compiled files) do the following. -a in this case denotes a seperate algorithm.
+
+
+```
+   cd build/bin
+   python graphitc.py -a (algorithm file path) -f (schedule file path) -o (output file name)
+```
+
+The example below compiles the algorithm file (../../test/input/cc.gt), with a separate schedule file (../../test/input_with_schedules/cc_pull_parallel.gt)
+
+```
+   cd build/bin
+   python graphitc.py -a ../../test/input/cc.gt -f ../../test/input_with_schedules/cc_pull_parallel.gt -o test.cpp
+```
+
+All new files will be located inside the bin directory. You must make the files here but they can be run elsewhere. After you compile your C++ program you can insert it into your own program. 
+
+
+			  parallel_for ( NodeID d=0; d < g.num_nodes(); d++) {
+    			for(NodeID s : g.in_neigh(d)){
+      			apply_func ( s , d );
+    			} //end of loop on in neighbors
+		  	} //end of outer for loop
+
+This is an example of code that was generated through Graphit. You can see this by opening the files you have just generated.  In the schedule the user used edgeset_apply_pull_parallel creating a parallel_for loop. This allows you to run the the C++ code using multiple cpus reducing runtime. However for the program to actually run in parallel you must use CILK and OPENMP as described below.
 ### Compiling and Using GraphIt
-<p class="caption">For now all builds and compilations must be done in the graphit/build/bin directory due to linking and paths in the code. This will soon be updated so that users can compile anywhere but for now please do it in the bin.</p>
-              
-<p> example of c++ code / parallel vs serial</p>
+
+To compile a serial version, you can use reguar g++ with support of c++11 standard to compile the generated C++ file (assuming it is named test.cpp).
+ 
+```
+    # assuming you are still in the bin directory under build/bin. If not, just do cd build/bin from the root of the directory
+    g++ -std=c++11 -I ../../src/runtime_lib/ test.cpp  -o -O3 test.o
+    ./test.o
+```
+
+To compile a parallel version of the c++ program, you will need both CILK and OPENMP. OPENMP is required for programs using NUMA optimized schedule (configApplyNUMA enabled) and static parallel optimizations (static-vertex-parallel option in configApplyParallelization). All other programs can be compiled with CILK. For analyzing large graphs (e.g., twitter, friendster, webgraph) on NUMA machines, numacl -i all improves the parallel performance. For smaller graphs, such as LiveJournal and Road graphs, not using numactl can be faster. 
+
+```
+    # assuming you are still in the bin directory under build/bin. If not, just do cd build/bin from the root of the directory
+
+    # compile and run with CILK
+    icpc -std=c++11 -I ../../src/runtime_lib/ -DCILK test.cpp -O3 -o  test.o
+    numactl -i all ./test.o
+    
+    # compile and run with OPENMP
+    icpc -std=c++11 -I ../../src/runtime_lib/ -DOPENMP -qopenmp test.cpp -O3 -o test.o
+    numactl -i all ./test.o
+    
+    # to run with NUMA optimizations
+    OMP_PLACES=sockets ./test.o 
+    
+```
+
+
 
 ## Tuning
 
-We designed GraphIt’s scheduling language functions to allow programmers to compose together edge traversal direction, frontier data structure, parallelization, cache optimizations, and NUMA optimizations discussed in the paper. The configApplyDirection functions allow programmers to configure directions used for traversal. The programmer can use the configDenseVertexSet function to switch between bitvector and boolean array for either source or destination vertexset or both. The flexible configApplyNumSSG function configures the number of segmented subgraphs and how the subgraphs are partitioned (fixedvertex-count and edge-aware-vertex-count). Setting the right number of segments and partitioning configuration allows random accesses to be restricted to a NUMA node or last level cache with balanced load as described in the paper. configApplyNUMA configures the segmented subgraphs to be executed in parallel with static or dynamic NUMA node assignment (static-parallel and dynamic-parallel), ensuring the random memory accesses to be restricted to the local NUMA node, while maintaining good parallel scalability. Finally, vertex data vectors can be fused together into an array of structs with fuseFields. To compose together different optimizations, the programmer first chooses a direction for traversal. Then the programmer can use the other scheduling functions to pick one option for the parallelization, graph partitioning, NUMA, and dense vertexset optimizations for the current direction. The programmer can configure each direction separately using the optional direction argument for hybrid directions (DensePush-SparsePush or DensePull-SparsePush). If no direction argument is specified, then the configuration applies to both directions.
+We designed GraphIt’s scheduling language functions to allow programmers to compose together edge traversal direction, frontier data structure, parallelization, cache optimizations, and NUMA optimizations discussed in the paper. The configApplyDirection functions allow programmers to configure directions used for traversal. The programmer can use the configDenseVertexSet function to switch between bitvector and boolean array for either source or destination vertexset or both. The flexible configApplyNumSSG function configures the number of segmented subgraphs and how the subgraphs are partitioned (fixedvertex-count and edge-aware-vertex-count). Setting the right number of segments and partitioning configuration allows random accesses to be restricted to a NUMA node or last level cache with balanced load as described in the paper. configApplyNUMA configures the segmented subgraphs to be executed in parallel with static or dynamic NUMA node assignment (static-parallel and dynamic-parallel), ensuring the random memory accesses to be restricted to the local NUMA node, while maintaining good parallel scalability. Finally, vertex data vectors can be fused together into an array of structs with fuseFields. 
+To compose together different optimizations, the programmer first chooses a direction for traversal. Then the programmer can use the other scheduling functions to pick one option for the parallelization, graph partitioning, NUMA, and dense vertexset optimizations for the current direction. The programmer can configure each direction separately using the optional direction argument for hybrid directions (DensePush-SparsePush or DensePull-SparsePush). If no direction argument is specified, then the configuration applies to both directions.
