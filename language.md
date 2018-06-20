@@ -14,9 +14,7 @@ programs.
 {:toc}
 
 # Basics
-Simit is an imperative language with statements, control flow and linear
-algebra expressions. In this section, we describe some of the language's basic
-constructs.
+GraphIt is an imperative language with statements, control flow, and high-level operators on sts of vertices ane edges. In this section, we describe some of the language's basic constructs.
 
 ## Functions
 Functions can take any number of parameters, including none. Each parameter
@@ -33,7 +31,7 @@ func add(a : float, b : float) -> c : float
 end
 ```
 
-Like functions in MATLAB, Simit functions can return any number of results,
+Like functions in MATLAB, GraphIt functions can return any number of results,
 including none. In the next example, the function `minMax` takes two `float`
 parameters and return two `float` results: the smaller of the two inputs as the
 first result and the larger of the two inputs as the second result.
@@ -55,18 +53,6 @@ Note that the list of function results must be surrounded by parentheses if the
 function returns more than one result. (The parentheses are optional if the
 function returns just a single result.)
 
-Exported functions can be called from C++ code through the [Simit C++
-API](api). They are declared by prepending the function declaration with the
-keyword `export`, as demonstrated below. Note that even though `main` does not
-take any parameter, an (empty) parameter list must still be included in the
-function declaration. Exported functions typically work on extern data
-structures in global scope.
-
-```
-export func main()
-  % Do something here
-end
-```
 
 ## Variables
 Variables are declared in function bodies or in the global scope using the
@@ -95,34 +81,7 @@ const bar = foo;
 bazz = 0.0;
 ```
 
-Note that variables are const by default! That is, variables that are declared
-without the `var` or `const` keywords are treated as const.
-
-## Basic Types
-Simit is statically typed with type inference. This means that the type of
-every variable is known at compile time, but that you do not always have to
-explicitly specify it; the compiler will figure most out automatically.
-
-The basic numeric types in Simit are `bool`, `int`, `float` and `complex`:
-
-```
-var mybool    : bool    = false;
-var myint     : int     = 0;
-var myfloat   : float   = 0.0;
-var mycomplex : complex = <0.0, 0.0>;
-```
-
-The `float` and `complex` types are double-precision floating-point by default
-when you use the CPU backend, but this can be changed to single-precision
-floating-point when compiling a Simit program. The GPU backend currently only
-supports single-precision floating-point `float` and `complex` types.
-
-Simit also supports a `string` type that can be used for I/O and debugging. The
-following example declares a variable containing the string "hello, world\n":
-
-```
-var mystr : string = "hello, world\n";
-```
+Individual elements of const vectors can still be updated. 
 
 ## Comments
 Single-line comments start with `%`:
@@ -143,12 +102,12 @@ h = 0.001;
 
 
 # Control Flow Statements
-Simit supports a variety of control flow constructs, including `if` statements,
+GraphIt supports a variety of control flow constructs, including `if` statements,
 `while` loops, `do`-`while` loops and `for` loops.
 
 ## If Statements
 
-In Simit, a simple `if` statement looks something like this:
+In GraphIt, a simple `if` statement looks something like this:
 
 ```
 if x < 1
@@ -169,36 +128,10 @@ else
 end
 ```
 
-Simit supports the following logical operators and comparison operators, which
-can be used to construct more complex conditions:
-
-```
-x or y;   % Logical OR
-x and y;  % Logical AND
-x xor y;  % Logical XOR
-not x;    % Logical NOT
-
-a == b;   % Equality
-a != b;   % Inequality
-a < b;    % Less than
-a <= b;   % Less than or equal to
-a > b;    % Greater than
-a >= b;   % Greater than or equal to
-```
-
-For example, if we only cared about the scenario in which the value of `x` is
-between 1 and 5, then we could have simply written:
-
-```
-if x >= 1 and x <= 5
-  print "x is between 1 and 5";
-end
-```
-
 
 ## While Loops
 
-A `while` loop in Simit looks like this:
+A `while` loop in GraphIt looks like this:
 
 ```
 while x < 100
@@ -208,25 +141,15 @@ end
 
 As with `if` statements, logical operators and comparison operators can be used
 to construct more complex conditions. Note that if the condition of a `while`
-loop is false when a Simit program first encounters the loop, the loop body
+loop is false when a GraphIt program first encounters the loop, the loop body
 will not be executed at all.
 
 
 
 ## For Loops
 
-Simit `for` loops are more like those found in MATLAB, Julia and Python than
-those available in C. They can be used to iterate over elements in a Simit set.
-For example (pun intended):
-
-```
-for p in points
-  % Do some computation with element p in points set
-end
-```
-
-You can also use a `for` loop to iterate over the set of all integers between
-two values, as shown in the following example.
+GraphIt `for` loops are more like those found in MATLAB, Julia and Python than
+those available in C. You can use a `for` loop to iterate over the set of all integers between two values, as shown in the following example.
 
 ```
 for i in 0:10
@@ -239,11 +162,10 @@ Note that the lower bound is _inclusive_ while the upper bound is _exclusive_
 omits 10.
 
 
-## Elements, Sets and Graphs
-Elements, sets and graphs form Simit's _data model_, which is the way you
-represent your system.
+# Elements, VertexSets, EdgeSets, Vectors
+Elements, vertexsets, edgesets and vectors form GraphIt's _data model_.
 
-### Elements
+## Elements
 An element is a type that stores one or more data fields, much like a struct in
 C/C++. For example, an element representing a point may store a position vector
 `x` and a velocity vector `v`, while an element represent a spring may store a
@@ -272,7 +194,7 @@ p.x = [0.0, 0.0, 1.0]';
 print p.x;  % [0.0, 0.0, 1.0]'
 ```
 
-### Sets
+## Sets
 Unlike C structs, elements live in sets. So Point elements must be stored in
 some set, such as `points`:
 
@@ -281,14 +203,14 @@ extern points : set{Point};
 ```
 
 The `extern` keyword simply means that the `points` set comes from outside the
-Simit program. Typically they have been assembled using the [Simit
+GraphIt program. Typically they have been assembled using the [GraphIt
 C++API](api).
 
 The best ways to work with sets are to
 [apply stencil update functions](#apply-stencil-update-functions) and to
 [assemble system vectors or matrices](#assemble-system-vectors-and-matrices).
 
-### Edge Sets
+## Edge Sets
 Edge sets are sets that also have connectivity information. In particular, edge
 set definitions specify the list of sets from which each edge's endpoints come.
 The following declares a set of spring elements that each connect two points
@@ -298,12 +220,12 @@ from the `points` set:
 extern springs : set{Element}(points,points);
 ```
 
-There is no explicit graph type in Simit; rather, graphs are formed implicitly
+There is no explicit graph type in GraphIt; rather, graphs are formed implicitly
 from the combination of sets and edge sets. This is similar to how graphs are
 often defined in mathematical papers (i.e. as an ordered pair `G = (V,E)`).
 
-Simit's graphs are hypergraphs, which just means that edges can have more (or
-less) than two endpoints. More precisely, a Simit graph is a _k_-uniform
+GraphIt's graphs are hypergraphs, which just means that edges can have more (or
+less) than two endpoints. More precisely, a GraphIt graph is a _k_-uniform
 hypergraphs; in other words, each edge can (and must) connect _k_ vertices,
 where _k_ is some non-negative integer constant. Thus, we can declare
 additional edge sets that contain triangle, tetrahedral or even hexahedral
@@ -330,25 +252,11 @@ tetrahedra.
 extern links : set{Link}(triangles, tetrahedra);
 ```
 
-### Grid Edge Sets
-Simit also supports declaring edge sets which connect points in a regular
-grid pattern with a particular dimensionality. The following declares a
-three-dimensional grid over the `points` set, meaning it contains links
-connecting each point to six other points (in the six cardinal directions
-one can move for a three-dimensional grid):
 
-```
-extern springsGrid : grid[3]{Element}(points);
-```
+# VertexSet Operators
 
-While one could build such a structure using a generic edge set, specifying this
-structure enables [coordinate-based accessing](#coordinate-based-access) when
-assembling matrices based on grid edge sets.
+# EdgeSet Operators
 
-Because these edge sets have very particular structure, extern grid edge sets
-are assembled with different syntax in the [Simit C++ API](api).
-
-## Apply Stencil Update Functions
 
 A stencil update function is any function that takes as arguments an element
 and (if the element is an edge) its endpoints. A stencil update function that
@@ -405,42 +313,4 @@ use an apply statement:
 ```
 apply length to springs;
 ```
-
-## System Vectors and Matrices
-In addition to integer ranges, the dimensions of vectors and matrices can be 
-_sets_. We call such vectors and matrices _system_ vectors and matrices, and 
-they can describe properties of an entire physical system. A system vector can 
-be thought of as a dictionary, while a system matrix can be thought of as a
-two-dimensional dictionary (or a dictionary of dictionaries):
-
-```
-% A vector with one float per point in the points set
-var a : vector[points](float);
-
-% A vector with one 3-vector block per point 
-% in the points set
-var b : vector[points](vector[3](float));
-
-% A matrix with one 3x3 matrix block non-empty 
-% per pair of points in the points set
-var K : matrix[points,points](matrix[3,3](float));
-```
-
-Note that system matrices can be sparse matrices and do not have to store 
-values for all |`points`|<sup>2</sup> combinations of indices.
-
-In the [Elements](#elements) section, we showed how an element field can be 
-accessed using the `.` operator. Sets also have fields, corresponding to the 
-fields of the set elements, that can be accessed using the same syntax. The 
-result of a set field read is a system vector that is constructed by 
-concatenating the corresponding fields of all elements in the set. For example, 
-if set `springs` contains elements `e0`, `e1` and `e2` (in that order) and if 
-each element has a field `m` of type `float`, then `springs.m` would correspond 
-to the system vector 
-
-```
-[e0.m, e1.m, e2.m]'
-``` 
-
-and would be of type `vector[springs](float)`.
 
