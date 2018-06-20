@@ -294,8 +294,10 @@ frontier = edges.from(frontier).to(toFilter).applyModified(updateEdge,parent, tr
 ## Vertexset Operators
 
 ### filter
+The filter operator is similar to the edgeset filter, except for it is applied on a single vertex and not edge. 
 
 ### apply
+The apply operator is similar to the edgeset apply operator, but applied to a vertex. 
 
 # Scheduling Language
 
