@@ -5,9 +5,7 @@ title: Getting Started
 Getting Started
 ===============
  
-
-
-        ##Downloading software
+##Downloading software
          Make sure you have all the correct Open Source Software installed. Things you need can be found in the [README](https://github.com/yunmingzhang17/graphit) file at the GitHub Website. You will need either CILK or OPENMV to allow you to run the C++ code in parallel. If you dont have either you can get both by simply downloading [GCC](https://gcc.gnu.org/). Alternatively if you already have CILK or OPENMV you can use those too. This tutorial will go through how to use GraphIt via both CILK and OPENMV.
         
         <hr>
