@@ -162,155 +162,143 @@ Note that the lower bound is _inclusive_ while the upper bound is _exclusive_
 omits 10.
 
 
-# Elements, VertexSets, EdgeSets, Vectors
+# Elements, Vectors, VertexSets, EdgeSets
 Elements, vertexsets, edgesets and vectors form GraphIt's _data model_.
 
 ## Elements
 An element is a type that stores one or more data fields, much like a struct in
-C/C++. For example, an element representing a point may store a position vector
-`x` and a velocity vector `v`, while an element represent a spring may store a
-scalar mass:
+C/C++. For example, a vertex in a social network representing a person can have a Person Element type. In the future, we plan to support fields in the Element. Currently, fields associated with an Element are expressed as separate Vectors descrived below. 
 
 ```
-element Point
-  x : vector[3](float);
-  v : vector[3](float);
-end
-
-element Element
-  m : float;
-  l : float;
+element Person
 end
 ```
 
-To read from or write to a field of an Element `e` or a Point `p`, you use the
-`.` operator:
+## Vectors
+
+Vectors are associated with an element. Essentially they act as fields of the elements. The following code says that `age` is a vector for `Person` Element type. Each Person would have an associated age field, and the field is initialized to 0. 
 
 ```
-e.m = 2.0;
-print e.m;  % 2.0
-
-p.x = [0.0, 0.0, 1.0]';
-print p.x;  % [0.0, 0.0, 1.0]'
-```
-
-## Sets
-Unlike C structs, elements live in sets. So Point elements must be stored in
-some set, such as `points`:
+const age : vector {Person}(int) = 0;
 
 ```
-extern points : set{Point};
-```
 
-The `extern` keyword simply means that the `points` set comes from outside the
-GraphIt program. Typically they have been assembled using the [GraphIt
-C++API](api).
 
-The best ways to work with sets are to
-[apply stencil update functions](#apply-stencil-update-functions) and to
-[assemble system vectors or matrices](#assemble-system-vectors-and-matrices).
 
-## Edge Sets
-Edge sets are sets that also have connectivity information. In particular, edge
-set definitions specify the list of sets from which each edge's endpoints come.
+
+## Edgesets
+Edgesets are have connectivity information. In particular, edge
+set definitions specify the type of elements from which each edge's endpoints come.
 The following declares a set of spring elements that each connect two points
-from the `points` set:
+from the `edges` set:
 
 ```
-extern springs : set{Element}(points,points);
+const edges : edgeset{Follow}(Person,Person);
 ```
 
 There is no explicit graph type in GraphIt; rather, graphs are formed implicitly
-from the combination of sets and edge sets. This is similar to how graphs are
+from the edgesets. This is similar to how graphs are
 often defined in mathematical papers (i.e. as an ordered pair `G = (V,E)`).
 
-GraphIt's graphs are hypergraphs, which just means that edges can have more (or
-less) than two endpoints. More precisely, a GraphIt graph is a _k_-uniform
-hypergraphs; in other words, each edge can (and must) connect _k_ vertices,
-where _k_ is some non-negative integer constant. Thus, we can declare
-additional edge sets that contain triangle, tetrahedral or even hexahedral
-elements, as demonstrated below:
+
+
+## Vertexsets
+
+Vertexsets are sets of vertices of a specific Element Type. `people` is a vertexset made up of endpoint elements of Person Type from the `edges` edgeset. 
 
 ```
-extern triangles  : set{Element}(points,points,points);
-extern tetrahedra : set{Element}(points * 4);
-extern hexahedra  : set{Element}(points * 6);
-```
+const people : vertexset{Person} = edges.getVertices();
 
-The `tetrahedra` and `hexahedra` sets are _homogeneous_ edge sets. This means
-that all of their endpoints are elements from the same set. Because of this we
-could use a syntactic shortcut to declare their endpoint lists, which freed us
-from writing out `point` four or six times.  The two ways to declare
-homogeneous edge sets shown above are equivalent.
+``` 
 
-That said, the more verbose syntax also lets us declare _heterogeneous_ edge
-sets, which are edge sets that can connect two or more _different_ sets. For
-instance, the `links` edge set below connects a set of triangles to a set of
-tetrahedra.
+# Set Opeartors 
+## Edgeset Operators
+
+
+### from, to and filter 
+`from` and `to` Filters out edges whose source vertex is in the input set. 
 
 ```
-extern links : set{Link}(triangles, tetrahedra);
-```
+const people_age_over_40 : vertexset{Person} = ... 
+const people_age_over_60 : vertexset{Person} = ...
 
-
-# VertexSet Operators
-
-# EdgeSet Operators
-
-
-A stencil update function is any function that takes as arguments an element
-and (if the element is an edge) its endpoints. A stencil update function that
-writes to the input element is called a _gather_ (or _pull_) stencil, while a
-stencil update function that writes to the endpoints is called a _scatter_ (or
-_pull_) stencil. The following stencil function moves a point one unit in the x
-direction. The `inout` keyword declares that `p` can be written to.
+func main()
+  ...
+  % find edges between people over 40 years old to people over 60 years old
+  var filtered_edges : edgeset{Friend}(Person, Person} = 
+       friend_edges.from(people_age_over_40).to(people_age_over_60);
+end 
 
 ```
-func move(inout p : Point)
-  p.x(0) = p.x(0) + 1.0;
+
+`filter` simply supplies a boolean function that checks every edge. 
+
+### srcFilter and dstFilter
+
+`srcFilter` and `dstFilter` filters out edges where the input boolean filtering function `filter_func` returns true. 
+
+```
+func filter_func(v : Vertex) -> output : bool
+    output =  age[v] > 40;
+end
+
+func main()
+  ...
+  filtered_edges = edges.srcFilter(filter_func);
+  ...
+end
+
+```
+
+### apply
+
+This operator applies a function `updateEdge ` to every edge. In one iteration of PageRank,
+
+```
+func updateEdge(src : Vertex, dst : Vertex)
+    new_rank[dst] += contrib[src];
+end
+
+func main()
+  ...
+  edges.apply(updateEdge);
+  ...
 end
 ```
 
-Stencil update functions are applied to every element of a set concurrently
-using an `apply` statement. The following statement moves every point in the
-`points` set one unit in the x direction:
+### applyModified
+This operator applies a function (`updateEdge`) to every edge. Returns a vertexset that contains destination vertices whose entry in the vector has been modified in `updateEdge`. The programmer can optionally disable deduplication within modfieid vertices. Deduplication is enabled by default.
 
 ```
-apply move to points;
-```
-
-Since `move` only takes a single point as input, the stencil can access just
-that one point and therefore has a completely local effect.
-
-A stencil update function that takes an edge from an edge set as input can
-access the element as well as the endpoints corresponding to that edge. As an
-example, the following stencil takes a spring, computes its length and stores
-the length into the `l` field of the corresponding element:
-
-```
-func length(inout s : Element,  p : (src : Point, dst : Point))
-  s.l = norm(p.dst.x - p.src.x);
+func updateEdge(src : Vertex, dst : Vertex)
+    parent[dst] = src;
 end
-```
 
-In the function definition above, `p` is a tuple containing the two endpoints
-of the spring. To be more precise, `p` is a _named_ (or _heterogeneous_) tuple,
-meaning its elements can be accessed by name using the `.` operator. Note that
-since all elements of `p` are actually of the same element type, we could have
-instead declared `p` as an _unnamed_ (or _homogeneous_) tuple that is indexed
-by integral indices using parentheses, as the following equivalent definition
-of `length` demonstrates:
-
-```
-func length(inout s : Element, p : (Point*2))
-  s.l = norm(p(1).x - p(0).x);
+func main()
+  ...
+  edges.applyModified(updateEdge,parent, true);
+  ...
 end
+
+``` 
+ 
+### combining edgeset operators
+
+The various operators can be and often are chained together. 
+
+```
+frontier = edges.from(frontier).to(toFilter).applyModified(updateEdge,parent, true);
+
 ```
 
-Now to update the lengths of all spring elements in the `springs` set, we again
-use an apply statement:
+## Vertexset Operators
 
-```
-apply length to springs;
-```
+### filter
+The filter operator is similar to the edgeset filter, except for it is applied on a single vertex and not edge. 
 
+### apply
+The apply operator is similar to the edgeset apply operator, but applied to a vertex. 
+
+# Scheduling Language
+
+For now, we refer users to the Section 5 of the [arxiv report](https://arxiv.org/abs/1805.00923) on how to use the scheduling language.  

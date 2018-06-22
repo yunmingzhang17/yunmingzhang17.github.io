@@ -60,14 +60,30 @@ programs.</p>
       <li><a href="#for-loops" id="markdown-toc-for-loops">For Loops</a></li>
     </ul>
   </li>
-  <li><a href="#elements-vertexsets-edgesets-vectors" id="markdown-toc-elements-vertexsets-edgesets-vectors">Elements, VertexSets, EdgeSets, Vectors</a>    <ul>
+  <li><a href="#elements-vectors-vertexsets-edgesets" id="markdown-toc-elements-vectors-vertexsets-edgesets">Elements, Vectors, VertexSets, EdgeSets</a>    <ul>
       <li><a href="#elements" id="markdown-toc-elements">Elements</a></li>
-      <li><a href="#sets" id="markdown-toc-sets">Sets</a></li>
-      <li><a href="#edge-sets" id="markdown-toc-edge-sets">Edge Sets</a></li>
+      <li><a href="#vectors" id="markdown-toc-vectors">Vectors</a></li>
+      <li><a href="#edgesets" id="markdown-toc-edgesets">Edgesets</a></li>
+      <li><a href="#vertexsets" id="markdown-toc-vertexsets">Vertexsets</a></li>
     </ul>
   </li>
-  <li><a href="#vertexset-operators" id="markdown-toc-vertexset-operators">VertexSet Operators</a></li>
-  <li><a href="#edgeset-operators" id="markdown-toc-edgeset-operators">EdgeSet Operators</a></li>
+  <li><a href="#set-opeartors" id="markdown-toc-set-opeartors">Set Opeartors</a>    <ul>
+      <li><a href="#edgeset-operators" id="markdown-toc-edgeset-operators">Edgeset Operators</a>        <ul>
+          <li><a href="#from-to-and-filter" id="markdown-toc-from-to-and-filter">from, to and filter</a></li>
+          <li><a href="#srcfilter-and-dstfilter" id="markdown-toc-srcfilter-and-dstfilter">srcFilter and dstFilter</a></li>
+          <li><a href="#apply" id="markdown-toc-apply">apply</a></li>
+          <li><a href="#applymodified" id="markdown-toc-applymodified">applyModified</a></li>
+          <li><a href="#combining-edgeset-operators" id="markdown-toc-combining-edgeset-operators">combining edgeset operators</a></li>
+        </ul>
+      </li>
+      <li><a href="#vertexset-operators" id="markdown-toc-vertexset-operators">Vertexset Operators</a>        <ul>
+          <li><a href="#filter" id="markdown-toc-filter">filter</a></li>
+          <li><a href="#apply-1" id="markdown-toc-apply-1">apply</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#scheduling-language" id="markdown-toc-scheduling-language">Scheduling Language</a></li>
 </ul>
 
 <h1 id="basics">Basics</h1>
@@ -202,145 +218,131 @@ end
 (like Python), so the above example prints all integers between 0 and 9 but
 omits 10.</p>
 
-<h1 id="elements-vertexsets-edgesets-vectors">Elements, VertexSets, EdgeSets, Vectors</h1>
+<h1 id="elements-vectors-vertexsets-edgesets">Elements, Vectors, VertexSets, EdgeSets</h1>
 <p>Elements, vertexsets, edgesets and vectors form GraphIt’s <em>data model</em>.</p>
 
 <h2 id="elements">Elements</h2>
 <p>An element is a type that stores one or more data fields, much like a struct in
-C/C++. For example, an element representing a point may store a position vector
-<code class="highlighter-rouge">x</code> and a velocity vector <code class="highlighter-rouge">v</code>, while an element represent a spring may store a
-scalar mass:</p>
+C/C++. For example, a vertex in a social network representing a person can have a Person Element type. In the future, we plan to support fields in the Element. Currently, fields associated with an Element are expressed as separate Vectors descrived below.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>element Point
-  x : vector[3](float);
-  v : vector[3](float);
-end
-
-element Element
-  m : float;
-  l : float;
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>element Person
 end
 </code></pre></div></div>
 
-<p>To read from or write to a field of an Element <code class="highlighter-rouge">e</code> or a Point <code class="highlighter-rouge">p</code>, you use the
-<code class="highlighter-rouge">.</code> operator:</p>
+<h2 id="vectors">Vectors</h2>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>e.m = 2.0;
-print e.m;  % 2.0
+<p>Vectors are associated with an element. Essentially they act as fields of the elements. The following code says that <code class="highlighter-rouge">age</code> is a vector for <code class="highlighter-rouge">Person</code> Element type. Each Person would have an associated age field, and the field is initialized to 0.</p>
 
-p.x = [0.0, 0.0, 1.0]';
-print p.x;  % [0.0, 0.0, 1.0]'
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const age : vector {Person}(int) = 0;
+
 </code></pre></div></div>
 
-<h2 id="sets">Sets</h2>
-<p>Unlike C structs, elements live in sets. So Point elements must be stored in
-some set, such as <code class="highlighter-rouge">points</code>:</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>extern points : set{Point};
-</code></pre></div></div>
-
-<p>The <code class="highlighter-rouge">extern</code> keyword simply means that the <code class="highlighter-rouge">points</code> set comes from outside the
-GraphIt program. Typically they have been assembled using the <a href="api">GraphIt
-C++API</a>.</p>
-
-<p>The best ways to work with sets are to
-<a href="#apply-stencil-update-functions">apply stencil update functions</a> and to
-<a href="#assemble-system-vectors-and-matrices">assemble system vectors or matrices</a>.</p>
-
-<h2 id="edge-sets">Edge Sets</h2>
-<p>Edge sets are sets that also have connectivity information. In particular, edge
-set definitions specify the list of sets from which each edge’s endpoints come.
+<h2 id="edgesets">Edgesets</h2>
+<p>Edgesets are have connectivity information. In particular, edge
+set definitions specify the type of elements from which each edge’s endpoints come.
 The following declares a set of spring elements that each connect two points
-from the <code class="highlighter-rouge">points</code> set:</p>
+from the <code class="highlighter-rouge">edges</code> set:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>extern springs : set{Element}(points,points);
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const edges : edgeset{Follow}(Person,Person);
 </code></pre></div></div>
 
 <p>There is no explicit graph type in GraphIt; rather, graphs are formed implicitly
-from the combination of sets and edge sets. This is similar to how graphs are
+from the edgesets. This is similar to how graphs are
 often defined in mathematical papers (i.e. as an ordered pair <code class="highlighter-rouge">G = (V,E)</code>).</p>
 
-<p>GraphIt’s graphs are hypergraphs, which just means that edges can have more (or
-less) than two endpoints. More precisely, a GraphIt graph is a <em>k</em>-uniform
-hypergraphs; in other words, each edge can (and must) connect <em>k</em> vertices,
-where <em>k</em> is some non-negative integer constant. Thus, we can declare
-additional edge sets that contain triangle, tetrahedral or even hexahedral
-elements, as demonstrated below:</p>
+<h2 id="vertexsets">Vertexsets</h2>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>extern triangles  : set{Element}(points,points,points);
-extern tetrahedra : set{Element}(points * 4);
-extern hexahedra  : set{Element}(points * 6);
+<p>Vertexsets are sets of vertices of a specific Element Type. <code class="highlighter-rouge">people</code> is a vertexset made up of endpoint elements of Person Type from the <code class="highlighter-rouge">edges</code> edgeset.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const people : vertexset{Person} = edges.getVertices();
+
 </code></pre></div></div>
 
-<p>The <code class="highlighter-rouge">tetrahedra</code> and <code class="highlighter-rouge">hexahedra</code> sets are <em>homogeneous</em> edge sets. This means
-that all of their endpoints are elements from the same set. Because of this we
-could use a syntactic shortcut to declare their endpoint lists, which freed us
-from writing out <code class="highlighter-rouge">point</code> four or six times.  The two ways to declare
-homogeneous edge sets shown above are equivalent.</p>
+<h1 id="set-opeartors">Set Opeartors</h1>
+<h2 id="edgeset-operators">Edgeset Operators</h2>
 
-<p>That said, the more verbose syntax also lets us declare <em>heterogeneous</em> edge
-sets, which are edge sets that can connect two or more <em>different</em> sets. For
-instance, the <code class="highlighter-rouge">links</code> edge set below connects a set of triangles to a set of
-tetrahedra.</p>
+<h3 id="from-to-and-filter">from, to and filter</h3>
+<p><code class="highlighter-rouge">from</code> and <code class="highlighter-rouge">to</code> Filters out edges whose source vertex is in the input set.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>extern links : set{Link}(triangles, tetrahedra);
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const people_age_over_40 : vertexset{Person} = ... 
+const people_age_over_60 : vertexset{Person} = ...
+
+func main()
+  ...
+  % find edges between people over 40 years old to people over 60 years old
+  var filtered_edges : edgeset{Friend}(Person, Person} = 
+       friend_edges.from(people_age_over_40).to(people_age_over_60);
+end 
+
 </code></pre></div></div>
 
-<h1 id="vertexset-operators">VertexSet Operators</h1>
+<p><code class="highlighter-rouge">filter</code> simply supplies a boolean function that checks every edge.</p>
 
-<h1 id="edgeset-operators">EdgeSet Operators</h1>
+<h3 id="srcfilter-and-dstfilter">srcFilter and dstFilter</h3>
 
-<p>A stencil update function is any function that takes as arguments an element
-and (if the element is an edge) its endpoints. A stencil update function that
-writes to the input element is called a <em>gather</em> (or <em>pull</em>) stencil, while a
-stencil update function that writes to the endpoints is called a <em>scatter</em> (or
-<em>pull</em>) stencil. The following stencil function moves a point one unit in the x
-direction. The <code class="highlighter-rouge">inout</code> keyword declares that <code class="highlighter-rouge">p</code> can be written to.</p>
+<p><code class="highlighter-rouge">srcFilter</code> and <code class="highlighter-rouge">dstFilter</code> filters out edges where the input boolean filtering function <code class="highlighter-rouge">filter_func</code> returns true.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>func move(inout p : Point)
-  p.x(0) = p.x(0) + 1.0;
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>func filter_func(v : Vertex) -&gt; output : bool
+    output =  age[v] &gt; 40;
+end
+
+func main()
+  ...
+  filtered_edges = edges.srcFilter(filter_func);
+  ...
+end
+
+</code></pre></div></div>
+
+<h3 id="apply">apply</h3>
+
+<p>This operator applies a function <code class="highlighter-rouge">updateEdge </code> to every edge. In one iteration of PageRank,</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>func updateEdge(src : Vertex, dst : Vertex)
+    new_rank[dst] += contrib[src];
+end
+
+func main()
+  ...
+  edges.apply(updateEdge);
+  ...
 end
 </code></pre></div></div>
 
-<p>Stencil update functions are applied to every element of a set concurrently
-using an <code class="highlighter-rouge">apply</code> statement. The following statement moves every point in the
-<code class="highlighter-rouge">points</code> set one unit in the x direction:</p>
+<h3 id="applymodified">applyModified</h3>
+<p>This operator applies a function (<code class="highlighter-rouge">updateEdge</code>) to every edge. Returns a vertexset that contains destination vertices whose entry in the vector has been modified in <code class="highlighter-rouge">updateEdge</code>. The programmer can optionally disable deduplication within modfieid vertices. Deduplication is enabled by default.</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apply move to points;
-</code></pre></div></div>
-
-<p>Since <code class="highlighter-rouge">move</code> only takes a single point as input, the stencil can access just
-that one point and therefore has a completely local effect.</p>
-
-<p>A stencil update function that takes an edge from an edge set as input can
-access the element as well as the endpoints corresponding to that edge. As an
-example, the following stencil takes a spring, computes its length and stores
-the length into the <code class="highlighter-rouge">l</code> field of the corresponding element:</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>func length(inout s : Element,  p : (src : Point, dst : Point))
-  s.l = norm(p.dst.x - p.src.x);
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>func updateEdge(src : Vertex, dst : Vertex)
+    parent[dst] = src;
 end
-</code></pre></div></div>
 
-<p>In the function definition above, <code class="highlighter-rouge">p</code> is a tuple containing the two endpoints
-of the spring. To be more precise, <code class="highlighter-rouge">p</code> is a <em>named</em> (or <em>heterogeneous</em>) tuple,
-meaning its elements can be accessed by name using the <code class="highlighter-rouge">.</code> operator. Note that
-since all elements of <code class="highlighter-rouge">p</code> are actually of the same element type, we could have
-instead declared <code class="highlighter-rouge">p</code> as an <em>unnamed</em> (or <em>homogeneous</em>) tuple that is indexed
-by integral indices using parentheses, as the following equivalent definition
-of <code class="highlighter-rouge">length</code> demonstrates:</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>func length(inout s : Element, p : (Point*2))
-  s.l = norm(p(1).x - p(0).x);
+func main()
+  ...
+  edges.applyModified(updateEdge,parent, true);
+  ...
 end
+
 </code></pre></div></div>
 
-<p>Now to update the lengths of all spring elements in the <code class="highlighter-rouge">springs</code> set, we again
-use an apply statement:</p>
+<h3 id="combining-edgeset-operators">combining edgeset operators</h3>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apply length to springs;
+<p>The various operators can be and often are chained together.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>frontier = edges.from(frontier).to(toFilter).applyModified(updateEdge,parent, true);
+
 </code></pre></div></div>
 
+<h2 id="vertexset-operators">Vertexset Operators</h2>
+
+<h3 id="filter">filter</h3>
+<p>The filter operator is similar to the edgeset filter, except for it is applied on a single vertex and not edge.</p>
+
+<h3 id="apply-1">apply</h3>
+<p>The apply operator is similar to the edgeset apply operator, but applied to a vertex.</p>
+
+<h1 id="scheduling-language">Scheduling Language</h1>
+
+<p>For now, we refer users to the Section 5 of the <a href="https://arxiv.org/abs/1805.00923">arxiv report</a> on how to use the scheduling language.</p>
 
       </section>
     </div>
