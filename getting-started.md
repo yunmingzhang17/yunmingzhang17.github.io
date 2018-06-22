@@ -108,25 +108,25 @@ To compile an input algorithm file and another separate schedule file (some of t
 
 
 ```
-   cd build/bin
-   python graphitc.py -a (algorithm file path) -f (schedule file path) -o (output file name)
+    cd build/bin
+    python graphitc.py -a (algorithm file path) -f (schedule file path) -o (output file name)
 ```
 
 The example below compiles the algorithm file (../../test/input/cc.gt), with a separate schedule file (../../test/input_with_schedules/cc_pull_parallel.gt)
 
 ```
-   cd build/bin
-   python graphitc.py -a ../../test/input/cc.gt -f ../../test/input_with_schedules/cc_pull_parallel.gt -o test.cpp
+    cd build/bin
+    python graphitc.py -a ../../test/input/cc.gt -f ../../test/input_with_schedules/cc_pull_parallel.gt -o test.cpp
 ```
 
 All new files will be located inside the bin directory. You must make the files here but they can be run elsewhere. After you compile your C++ program you can insert it into your own program. 
 
 
-			  parallel_for ( NodeID d=0; d < g.num_nodes(); d++) {
-    			for(NodeID s : g.in_neigh(d)){
-      			apply_func ( s , d );
-    			} //end of loop on in neighbors
-		  	} //end of outer for loop
+	parallel_for ( NodeID d=0; d < g.num_nodes(); d++) {
+    	for(NodeID s : g.in_neigh(d)){
+      		apply_func ( s , d );
+    	} //end of loop on in neighbors
+	} //end of outer for loop
 
 This is an example of code that was generated through Graphit. You can see this by opening the files you have just generated.  In the schedule the user used edgeset_apply_pull_parallel creating a parallel_for loop. This allows you to run the the C++ code using multiple cpus reducing runtime. However for the program to actually run in parallel you must use CILK and OPENMP as described below.
 ### Compiling and Using GraphIt
