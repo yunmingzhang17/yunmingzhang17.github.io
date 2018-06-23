@@ -18,19 +18,19 @@ If you have not yet already please read the basic information on the [GraphIt La
 
 ### PageRankDelta Example
 <img src="gallery/PageRankDeltaCode.png" alt="Page Rank Delta Code using GraphIt">
-<p class="caption">*This is the code of Page Rank Delta using Graphit*</p>
+        <p class="caption">*This is the code of Page Rank Delta using Graphit*</p>
 
 Here we will go through an example of GraphIt Code using Page Rank Delta as an example. You can find this file under your graphit/apps folder 
 Additionally here is a link to the [GraphIt paper.](https://arxiv.org/pdf/1805.00923.pdf) Sections 4 and 5 give the complete breakdown of the Page Rank Delta code. Please look here if you want a more detailed breakdown of the functionality of Graphit.
 
 ###      Algorithm Explanatation
 <img src="gallery/PageRankDeltaElements1-2.png" alt="Page Rank Delta Code lines 1-2">
-<p class="caption">*Page Rank Delta Code lines 1-2* </p>
+        <p class="caption">*Page Rank Delta Code lines 1-2* </p>
 
 Here we construct the basic Elements that will be used by graphit. Most Graph Analysis Algorithms will require that you have both of these. GraphIt supports multiple types of user-defined vertices and edges, which is important for algorithms that work on multiple graphs.
 
 <img src="gallery/PageRankDeltaConst3-11.png" alt="Page Rank Delta Code lines 3-11">
-<p class="caption">*Page Rank Delta Code lines 3-11* </p>
+        <p class="caption">*Page Rank Delta Code lines 3-11* </p>
 
 [A quick refresher on Variables](#variables)
 
@@ -38,7 +38,7 @@ After defining element types, the programmer can construct vertexsets and edgese
 
 
 <img src="gallery/PageRankDeltaFuncs.png" alt="Page Rank Delta Code lines 12-27">
-<p class="caption">*Page Rank Delta Code lines 12-27* </p>
+        <p class="caption">*Page Rank Delta Code lines 12-27* </p>
 
 [A quick refresher on Functions](#functions)
 
@@ -172,7 +172,6 @@ Here is a list of Scheduling functions that you can use
 <img src="gallery/SchedulingApply.png" alt="Scheduling Functions">
 
 Below we will show how changing the Schedule affects the C++ generated Code. This first section of code is pageRankDelta code without a schedule.
-
 <img src="gallery/pageRankDeltaGeneratedCodeDefault.png" alt="Page Rank Delta C++ Generated Code">
 
 <img src="gallery/pageRankDeltaGeneratedCodeDensePull.png" alt="Page Rank Delta C++ Generated Code">
