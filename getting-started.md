@@ -172,12 +172,12 @@ Here is a list of Scheduling functions that you can use
 <img src="gallery/SchedulingApply.png" alt="Scheduling Functions">
 
 Below we will show how changing the Schedule affects the C++ generated Code. This first section of code is pageRankDelta code without a schedule.
-<img src="gallery/PageRankDeltaGeneratedCodeDefault.png" alt="Page Rank Delta C++ Generated Code">
+<img src="gallery/pageRankDeltaGeneratedCodeDefault.png" alt="Page Rank Delta C++ Generated Code">
 
-<img src="gallery/PageRankDeltaGeneratedCodeDensePull.png" alt="Page Rank Delta C++ Generated Code">
+<img src="gallery/pageRankDeltaGeneratedCodeDensePull.png" alt="Page Rank Delta C++ Generated Code">
 
-<img src="gallery/PageRankDeltaGeneratedCodeDynamic.png" alt="Page Rank Delta C++ Generated Code">
+<img src="gallery/pageRankDeltaGeneratedCodeDynamic.png" alt="Page Rank Delta C++ Generated Code">
 
-<img src="gallery/PageRankDeltaGeneratedCodeBitVector.png" alt="Page Rank Delta C++ Generated Code">
+<img src="gallery/pageRankDeltaGeneratedCodeBitVector.png" alt="Page Rank Delta C++ Generated Code">
 
 
