@@ -14,9 +14,11 @@ Clone graphit by going to [GraphIt](https://github.com/yunmingzhang17/graphit)
         <p class="caption"> *Everything will be done graphit/build/bin* </p>
    
 ## Basic Variables, Constructs, and Functions
+
 If you have not yet already please read the basic information on the [GraphIt Language.](language)
 
 ### PageRankDelta Example
+
 <img src="gallery/PageRankDeltaCode.png" alt="Page Rank Delta Code using GraphIt">
 
 *This is the code of Page Rank Delta using Graphit*
@@ -32,7 +34,8 @@ _Page Rank Delta Code lines 1-2_
 Here we construct the basic Elements that will be used by graphit. Most Graph Analysis Algorithms will require that you have both of these. GraphIt supports multiple types of user-defined vertices and edges, which is important for algorithms that work on multiple graphs.
 
 <img src="gallery/PageRankDeltaConst3-11.png" alt="Page Rank Delta Code lines 3-11">
-        <p class="caption"> *Page Rank Delta Code lines 3-11* </p>
+
+*Page Rank Delta Code lines 3-11*
 
 [A quick refresher on Variables](#variables)
 
@@ -40,7 +43,8 @@ After defining element types, the programmer can construct vertexsets and edgese
 
 
 <img src="gallery/PageRankDeltaFuncs.png" alt="Page Rank Delta Code lines 12-27">
-        <p class="caption">*Page Rank Delta Code lines 12-27* </p>
+
+*Page Rank Delta Code lines 12-27*
 
 [A quick refresher on Functions](#functions)
 
@@ -52,7 +56,8 @@ The third and last function does something similar to above by taking in a verte
 
 
 <img src="gallery/PageRankDeltaMain.png" alt="Page Rank Delta Code lines 28-39">
-<p class="caption">*Page Rank Delta Code lines 28-39* </p>
+
+*Page Rank Delta Code lines 28-39*
 
 This is where your program comes together and runs together with all the functions you created. What makes GraphIt great is that the language constructs of GraphIt separates edge processing logic from edge traversal, edge filtering (from, to, srcFilter, and dstFilter), atomic synchronization, and modified vertex deduplication and tracking logic (apply and applyModified). This separation enables the compiler to represent the algorithm from a high level, exposing opportunities for edge traversal and vertex data layout optimizations. Moreover, it frees the programmer from specifying low-level implementation details, such as synchronization and deduplication logic. 
 
@@ -61,14 +66,18 @@ The algorithm maintains the set of vertices whose rank has changed greatly from 
 
 
 ###      Scheduling Explanatation
+
 <img src="gallery/PageRankDeltaSchedule.png" alt="Page Rank Delta Schedule">
-<p class="caption">*Page Rank Delta Code Schedule* </p>
+
+*Page Rank Delta Code Schedule*
 
 We use labels (#label#) in algorithm specifications to identify the statements on which optimizations apply. Programmers can assign a label on the left side of a statement and later reference it in the scheduling language. Above shows a simple schedule for the PageRankDelta implementation. The programmer adds label s1 to the edgeset operation statement. After the schedule keyword, the programmer can make a series of calls with the scheduling functions.
 
  
 ## Compiling
+
 Before we can compile Graphit you need to first follow these steps and build the bin for the program
+
           <h3>Build Graphit</h3>
             <p>To perform an out-of-tree build of Graphit do:</p>
             <p>After you have cloned the directory:</p>
@@ -94,10 +103,12 @@ Before we can compile Graphit you need to first follow these steps and build the
                 python test_with_schedules.py
             </code></pre>
 ### Compile GraphIt Programs
-<p class="caption">**For now all builds and compilations must be done in the graphit/build/bin directory due to linking and paths in the code. This will soon be updated so that users can compile anywhere but for now please do it in the bin.**</p>
+
+**For now all builds and compilations must be done in the graphit/build/bin directory due to linking and paths in the code. This will soon be updated so that users can compile anywhere but for now please do it in the bin.**
 
 GraphIt compiler currently generates a C++ output file from the .gt input GraphIt programs. 
 To compile an input GraphIt file with schedules in the same file (assuming the build directory is in the root project directory) do the following. The -f denotes the input file and the -o denotes the output file. 
+
 ```
     cd build/bin
     python graphitc.py -f (input file path) -o (output file name)
@@ -105,11 +116,13 @@ To compile an input GraphIt file with schedules in the same file (assuming the b
 ```
 
 The following is an example:
+
 ```
     cd build/bin
     python graphitc.py -f ../../test/input/simple_vector_sum.gt -o test.cpp
     
 ```
+
 To compile an input algorithm file and another separate schedule file (some of the test files have hardcoded paths to test inputs, be sure to modify that or change the directory you run the compiled files) do the following. -a in this case denotes a seperate algorithm.
 
 
@@ -127,7 +140,6 @@ The example below compiles the algorithm file (../../test/input/cc.gt), with a s
 
 All new files will be located inside the bin directory. You must make the files here but they can be run elsewhere. After you compile your C++ program you can insert it into your own program. 
 
-
 	parallel_for ( NodeID d=0; d < g.num_nodes(); d++) {
     	for(NodeID s : g.in_neigh(d)){
       		apply_func ( s , d );
@@ -135,6 +147,7 @@ All new files will be located inside the bin directory. You must make the files 
 	} //end of outer for loop
 
 This is an example of code that was generated through Graphit. You can see this by opening the files you have just generated.  In the schedule the user used edgeset_apply_pull_parallel creating a parallel_for loop. This allows you to run the the C++ code using multiple cpus reducing runtime. However for the program to actually run in parallel you must use CILK and OPENMP as described below.
+
 ### Compiling and Using GraphIt
 
 To compile a serial version, you can use reguar g++ with support of c++11 standard to compile the generated C++ file (assuming it is named test.cpp).
@@ -163,17 +176,17 @@ To compile a parallel version of the c++ program, you will need both CILK and OP
     
 ```
 
-
-
 ## Tuning
 
 We designed GraphIt’s scheduling language functions to allow programmers to compose together edge traversal direction, frontier data structure, parallelization, cache optimizations, and NUMA optimizations discussed in the paper. The configApplyDirection functions allow programmers to configure directions used for traversal. The programmer can use the configDenseVertexSet function to switch between bitvector and boolean array for either source or destination vertexset or both. The flexible configApplyNumSSG function configures the number of segmented subgraphs and how the subgraphs are partitioned (fixedvertex-count and edge-aware-vertex-count). Setting the right number of segments and partitioning configuration allows random accesses to be restricted to a NUMA node or last level cache with balanced load as described in the paper. configApplyNUMA configures the segmented subgraphs to be executed in parallel with static or dynamic NUMA node assignment (static-parallel and dynamic-parallel), ensuring the random memory accesses to be restricted to the local NUMA node, while maintaining good parallel scalability. Finally, vertex data vectors can be fused together into an array of structs with fuseFields. 
 To compose together different optimizations, the programmer first chooses a direction for traversal. Then the programmer can use the other scheduling functions to pick one option for the parallelization, graph partitioning, NUMA, and dense vertexset optimizations for the current direction. The programmer can configure each direction separately using the optional direction argument for hybrid directions (DensePush-SparsePush or DensePull-SparsePush). If no direction argument is specified, then the configuration applies to both directions.
 
 Here is a list of Scheduling functions that you can use
+
 <img src="gallery/SchedulingApply.png" alt="Scheduling Functions">
 
 Below we will show how changing the Schedule affects the C++ generated Code. This first section of code is pageRankDelta code without a schedule.
+
 <img src="gallery/pageRankDeltaGeneratedCodeDefault.png" alt="Page Rank Delta C++ Generated Code">
 
 <img src="gallery/pageRankDeltaGeneratedCodeDensePull.png" alt="Page Rank Delta C++ Generated Code">
