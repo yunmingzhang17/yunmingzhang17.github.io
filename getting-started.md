@@ -18,6 +18,7 @@ If you have not yet already please read the basic information on the [GraphIt La
 
 ### PageRankDelta Example
 <img src="gallery/PageRankDeltaCode.png" alt="Page Rank Delta Code using GraphIt">
+
 *This is the code of Page Rank Delta using Graphit*
 
 Here we will go through an example of GraphIt Code using Page Rank Delta as an example. You can find this file under your graphit/apps folder 
@@ -25,6 +26,7 @@ Additionally here is a link to the [GraphIt paper.](https://arxiv.org/pdf/1805.0
 
 ###      Algorithm Explanatation
 <img src="gallery/PageRankDeltaElements1-2.png" alt="Page Rank Delta Code lines 1-2">
+
 _Page Rank Delta Code lines 1-2_
 
 Here we construct the basic Elements that will be used by graphit. Most Graph Analysis Algorithms will require that you have both of these. GraphIt supports multiple types of user-defined vertices and edges, which is important for algorithms that work on multiple graphs.
