@@ -189,10 +189,21 @@ Below we will show how changing the Schedule affects the C++ generated Code. Thi
 
 <img src="gallery/pageRankDeltaGeneratedCodeDefault.png" alt="Page Rank Delta C++ Generated Code">
 
+*This is the generated code for Page Rank Delta with no scheduling. This means that there are no optimizations. All this C++ code does is the basic page rank deltasum addition*
+
 <img src="gallery/pageRankDeltaGeneratedCodeDensePull.png" alt="Page Rank Delta C++ Generated Code">
+
+*With this Schedule program->configApplyDirection("s1", DensePull-SparsePush) the program is affecting the #s1# label associated with the code*
+'''
+edges.from(frontier).apply(updateEdge)
+'''
+*If the amount of edges exceeds a certain threshold then the program runs from destination to source. If it is under than it runs from source to destination. Depending on the density of the graph one option may run faster than the other.*
 
 <img src="gallery/pageRankDeltaGeneratedCodeDynamic.png" alt="Page Rank Delta C++ Generated Code">
 
+*Here by adding to the schedule the generated C++ is capable of running in parallel on multiple cores at once. This is seen by the parallel_for loop in the code and if that loop is run using CILK or OPENMV then it being run on mulitple cores will make the program much faster.*
+
 <img src="gallery/pageRankDeltaGeneratedCodeBitVector.png" alt="Page Rank Delta C++ Generated Code">
 
+*Adding this to the schedule will fuse vertexs together allowing them to be handled in groups. By doing this in certain cases will allow your algorithm to run faster.*
 
