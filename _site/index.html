@@ -75,6 +75,10 @@ set of edge traversal and vertex data layout optimizations.</p>
 <p>GraphIt outperforms the next fastest of six state-of-the-art shared-memory
 frameworks (Ligra, Green-Marl, GraphMat, Galois, Gemini, and Grazelle) by up to 4.8x and reduces the lines of code by up to an order of magnitude compared to the next fastest framework.</p>
 
+<p>Below we show some performance comparisons collected on our dual-socket system with Intel Xeon E5-2695 v3 CPUs with 12 cores each for a total of 24 cores and 48 hyper-threads. The system has 128GB of DDR3-1600 memory and 30 MB last level cache on each socket, and runs with Transparent Huge Pages (THP) enabled.</p>
+
+<p><img src="gallery/perf_comparison.png" alt="GraphIt performance" /></p>
+
 <p>GraphIt is open source, under a <a href="https://github.com/simit-lang/simit/blob/master/LICENSE">commercially permissive MIT
 license</a>. We encourage
 you to use it in open source or commercial projects!</p>
