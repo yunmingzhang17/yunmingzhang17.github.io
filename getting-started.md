@@ -6,7 +6,7 @@ Getting Started
 ===============
  
 ## Downloading software
-Make sure you have all the correct Open Source Software installed. Things you need can be found in the [README](https://github.com/yunmingzhang17/graphit) file at the GitHub Website. You will need either CILK or OPENMP to allow you to run the C++ code in parallel. If you dont have either you can get both by simply downloading [GCC](https://gcc.gnu.org/). Alternatively if you already have CILK or OPENMP you can use those too. This tutorial will go through how to use GraphIt via both CILK and OPENMP.
+Make sure you have all the correct Open Source Software installed. First follow the [README](https://github.com/yunmingzhang17/graphit) file here to clone and install graphIt. You will need either CILK or OPENMP to allow you to run the C++ code in parallel. If you dont have either you can get both by simply downloading [GCC](https://gcc.gnu.org/). Alternatively if you already have CILK or OPENMP you can use those too. This tutorial will go through how to use GraphIt via both CILK and OPENMP.
         
 ## Cloning graphit
 Clone graphit by going to [GraphIt](https://github.com/yunmingzhang17/graphit)
@@ -23,7 +23,8 @@ If you have not yet already please read the basic information on the [GraphIt La
 
 *This is the code of Page Rank Delta using Graphit*
 
-Here we will go through an example of GraphIt Code using Page Rank Delta as an example. You can find this file under your graphit/apps folder 
+Here we will go through an example of GraphIt Code using Page Rank Delta as an example. You can find this file under your graphit/apps folder also linked [here](https://github.com/yunmingzhang17/graphit/tree/master/apps)
+
 Additionally here is a link to the [GraphIt paper.](https://arxiv.org/pdf/1805.00923.pdf) Sections 4 and 5 give the complete breakdown of the Page Rank Delta code. Please look here if you want a more detailed breakdown of the functionality of Graphit.
 
 ###      Algorithm Explanatation
@@ -37,7 +38,7 @@ Here we construct the basic Elements that will be used by graphit. Most Graph An
 
 *Page Rank Delta Code lines 3-11*
 
-[A quick refresher on Variables](#variables)
+[A quick refresher on Variables](http://graphit-lang.org/language#variables)
 
 After defining element types, the programmer can construct vertexsets and edgesets. Lines 3–4 of Fig. 4 show the definitions of an edgeset, edges, and vertexset, vertices. Each element of the edgeset is of Edge type (specified between “{ }”), and the source and destination of the edge is of Vertex type (specified between “( )”). The edgeset declaration supports edges with different types of source and destination vertices (e.g., in a bipartite graph). vertices uses the getVertices method on the edgeset to obtain the union of source and destination vertices of edges. Data for vertices and edges are defined as vectors associated with an element type denoted using the { } syntax (Lines 8–11).
 
@@ -46,7 +47,7 @@ After defining element types, the programmer can construct vertexsets and edgese
 
 *Page Rank Delta Code lines 12-27*
 
-[A quick refresher on Functions](#functions)
+[A quick refresher on Functions](http://graphit-lang.org/language#functions)
 
 The algorithm described here uses 3 main functions. The first is updateEdge which takes in an edge and adds to the current DeltaSum of the destination, the Delta of the source divided by the amount of out degrees of the source. 
 
@@ -78,10 +79,10 @@ We use labels (#label#) in algorithm specifications to identify the statements o
 
 Before we can compile Graphit you need to first follow these steps and build the bin for the program
 
-          <h3>Build Graphit</h3>
-            <p>To perform an out-of-tree build of Graphit do:</p>
-            <p>After you have cloned the directory:</p>
-            <pre><code>    
+###Build Graphit
+<p>To perform an out-of-tree build of Graphit do:</p>
+    <p>After you have cloned the directory:</p>
+    <pre><code>    
                 cd graphit
                 mkdir build
                 cd build
@@ -102,6 +103,7 @@ Before we can compile Graphit you need to first follow these steps and build the
                 python test.py
                 python test_with_schedules.py
             </code></pre>
+
 ### Compile GraphIt Programs
 
 **For now all builds and compilations must be done in the graphit/build/bin directory due to linking and paths in the code. This will soon be updated so that users can compile anywhere but for now please do it in the bin.**
