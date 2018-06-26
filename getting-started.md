@@ -79,7 +79,8 @@ We use labels (#label#) in algorithm specifications to identify the statements o
 
 Before we can compile Graphit you need to first follow these steps and build the bin for the program
 
-###Build Graphit
+### Build Graphit
+
 <p>To perform an out-of-tree build of Graphit do:</p>
     <p>After you have cloned the directory:</p>
     <pre><code>    
