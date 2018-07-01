@@ -25,10 +25,30 @@ h1, h2, h3 {
 h1 {
   font-size:28px;
 }
+
+h2 {
+  font-size:20px;
+}
+
+h3 {
+  padding-left: 50px;
+}
+
+h4 {
+  padding-left: 50px;
+}
+
+
+
 h1.title {
   font-size:72px;
   letter-spacing: -4px;
   font-weight: 400;
+}
+
+p.caption {
+   font-size:10px;
+   font-family: "Helvetica Condensed", sans-serif;
 }
 
 a {
