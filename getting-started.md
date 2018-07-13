@@ -10,8 +10,8 @@ Make sure you have all the correct Open Source Software installed. First follow 
         
 ## Cloning graphit
 Clone graphit by going to [GraphIt](https://github.com/yunmingzhang17/graphit)
-        <p class="caption"> *Something to note for the following tutorial.*</p>
-        <p class="caption"> *Everything will be done graphit/build/bin* </p>
+        *Something to note for the following tutorial.*
+        *Everything will be done graphit/build/bin*
    
 ## Basic Variables, Constructs, and Functions
 
@@ -110,7 +110,7 @@ edges.from(frontier).apply(updateEdge)
 
 <img src="gallery/pageRankDeltaGeneratedCodeBitVector.png" alt="Page Rank Delta C++ Generated Code">
 
-*Adding this to the schedule will fuse vertexs together allowing them to be handled in groups. By doing this in certain cases will allow your algorithm to run faster.*
+*Adding this to the schedule will fuse vertexs together allowing them to be handled in groups. By doing this you will improve spatial locatility and this will improve your cache hit rate. However on the other hand this is require more processing. Thus depending on your algorithm using a bitvector may or may not be useful.*
 
 
 
@@ -120,29 +120,31 @@ Before we can compile Graphit you need to first follow these steps and build the
 
 ### Build Graphit
 
-<p>To perform an out-of-tree build of Graphit do:</p>
-    <p>After you have cloned the directory:</p>
-    <pre><code>    
+To perform an out-of-tree build of Graphit do:
+
+After you have cloned the directory:
+```
                 cd graphit
                 mkdir build
                 cd build
                 cmake ..
                 make
-            </code></pre>
-            <p>To run the C++ test suite do (all tests should pass):</p>
-            <pre><code>    
+```
+To run the C++ test suite do (all tests should pass):
+```
                 cd build/bin
                 ./graphit_test
-            </code></pre>
-            <p>To run the Python end-to-end test suite:</p>
-            <p>start at the top level graphit directory cloned from Github, NOT the build directory
-            (All tests would pass, but some would generate error messages from the g++ compiler. This is expected.)
-            Currently the project supports Python 2.x and not Python 3.x (the print syntax is different)</p>
-            <pre><code>    
+```
+To run the Python end-to-end test suite:
+
+start at the top level graphit directory cloned from Github, NOT the build directory
+(All tests would pass, but some would generate error messages from the g++ compiler. This is expected.)
+Currently the project supports Python 2.x and not Python 3.x (the print syntax is different)
+``` 
                 cd graphit/test/python
                 python test.py
                 python test_with_schedules.py
-            </code></pre>
+```
 
 ### Compile GraphIt Programs
 
