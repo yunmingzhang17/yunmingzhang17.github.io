@@ -62,26 +62,14 @@ Variables are declared in function bodies or in the global scope using the
 var foo : int;
 ```
 
-If the variable declaration has an initializer, then the variable's type can be
-inferred from the initializer value. The following are equivalent ways to
-define a floating-point variable that is initialized to `0.0`:
+The variable can be initialized with the following syntax.
 
 ```
 var foo : float = 0.0;
-var foo = 0.0;
 ```
 
 The `const` keyword creates a variable that cannot be modified after
-initialization.  The following example shows three ways to declare constant
-variables that are initialized to `0.0`:
-
-```
-const foo = 0.0;
-const bar = foo;
-bazz = 0.0;
-```
-
-Individual elements of const vectors can still be updated. 
+initialization.  Individual elements of const vectors can still be updated. 
 
 ## Comments
 Single-line comments start with `%`:
