@@ -131,24 +131,13 @@ function returns just a single result.)</p>
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var foo : int;
 </code></pre></div></div>
 
-<p>If the variable declaration has an initializer, then the variable’s type can be
-inferred from the initializer value. The following are equivalent ways to
-define a floating-point variable that is initialized to <code class="highlighter-rouge">0.0</code>:</p>
+<p>The variable can be initialized with the following syntax.</p>
 
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>var foo : float = 0.0;
-var foo = 0.0;
 </code></pre></div></div>
 
 <p>The <code class="highlighter-rouge">const</code> keyword creates a variable that cannot be modified after
-initialization.  The following example shows three ways to declare constant
-variables that are initialized to <code class="highlighter-rouge">0.0</code>:</p>
-
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const foo = 0.0;
-const bar = foo;
-bazz = 0.0;
-</code></pre></div></div>
-
-<p>Individual elements of const vectors can still be updated.</p>
+initialization.  Individual elements of const vectors can still be updated.</p>
 
 <h2 id="comments">Comments</h2>
 <p>Single-line comments start with <code class="highlighter-rouge">%</code>:</p>
