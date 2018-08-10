@@ -30,13 +30,12 @@
         <a href="index"><h1 class="title"> GraphIt</h1></a>
         <p>A high-performance graph domain specific language</p>
         <ul>
-          <li><a href="http://github.com/simit-lang/simit">View On <strong>GitHub</strong></a></li>
-          <li><a href="http://builds.simit-lang.org">Continuous<strong>Build Status</strong></a></li>
+          <li><a href="http://github.com/yunmingzhang17/graphit">View On <strong>GitHub</strong></a></li>
         </ul>
         <p><a href="getting-started">Getting Started</a></p>
         <p><a href="language">Language Manual</a></p>
         <p><a href="publications">Publications</a></p>
-	<p><a href="user-group">User Group</a></p>
+	<p><a href="https://lists.csail.mit.edu/mailman/listinfo/graphit">Mailing List</a></p>
       </header>
       <footer>
         <p><a href="https://yunmingzhang.wordpress.com/">Yunming Zhang</a> <br>yunming at mit dot edu</p>
