@@ -2,6 +2,9 @@ cagra:
   link: https://ieeexplore.ieee.org/document/8257937/
 
 graphit:
+  link: https://dl.acm.org/citation.cfm?id=3276491
+
+graphit_arxiv:
   authors:
     - yunming
     - mengjiao
