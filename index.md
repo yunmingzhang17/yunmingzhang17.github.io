@@ -1,6 +1,6 @@
 ---
 layout: post
-title: GraphIt - A High-Performance Graph Domain Specific Language
+title: GraphIt- A High-Performance Domain Specific Language for Graph Analytics
 ---
 
 <meta name="Description" content="GraphIt - A High-
