@@ -13,6 +13,8 @@ programs.
 * auto-gen TOC:
 {:toc}
 
+
+
 # Basics
 GraphIt is an imperative language with statements, control flow, and high-level operators on sts of vertices ane edges. In this section, we describe some of the language's basic constructs.
 
@@ -290,3 +292,18 @@ The apply operator is similar to the edgeset apply operator, but applied to a ve
 # Scheduling Language
 
 For now, we refer users to the Section 5 of the [arxiv report](https://arxiv.org/abs/1805.00923) on how to use the scheduling language.  
+
+
+
+
+# Python Binding
+
+## Python Types
+
+## GraphIt 
+
+The programmer uses the "exported" keyword. 
+
+## Python API
+
+
