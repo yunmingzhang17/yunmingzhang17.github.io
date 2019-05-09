@@ -306,15 +306,15 @@ In this section we describe how to build such an interface and how the types fro
 
 The main difference between writing GraphIt programs and writing functions to be called from python is that GraphIt now compiles as a library instead of an executable program. So it doesn't contain a `main` function. Instead users can define any number of custom functions which can be separately invoked from python. 
 
-To separate internal helper functions from the function which are exposed as a part of the library, we add the `exported` keyword. This keyword can be added to any function declaration before the `func` keyword. This tells the compiler that this function is supposed to be a part of the library to be called from python and sufficient wrappers should be generated for the same. 
+To separate internal helper functions from the function which are exposed as a part of the library, we add the `export` keyword. This keyword can be added to any function declaration before the `func` keyword. This tells the compiler that this function is supposed to be a part of the library to be called from python and sufficient wrappers should be generated for the same. 
 
 ```
-exported func do_pagerank(edges: edgeset{Edge}, damp: double) -> ranks: vector{Vertex}(float)
+export func do_pagerank(edges: edgeset{Edge}, damp: double) -> ranks: vector{Vertex}(float)
   ...
 end
 ```
 
-Notice how unlike the `main` function which doesn't take any arguments, exported functions can take arguments for the graph and the required parameters for the algorithm which can be directly passed from the python code. 
+Notice how unlike the `main` function which doesn't take any arguments, export functions can take arguments for the graph and the required parameters for the algorithm which can be directly passed from the python code. 
 
 ## Type mappings 
 
