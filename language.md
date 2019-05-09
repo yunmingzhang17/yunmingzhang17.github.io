@@ -315,7 +315,6 @@ end
 ```
 
 Notice how unlike the `main` function which doesn't take any arguments, exported functions can take arguments for the graph and the required parameters for the algorithm which can be directly passed from the python code. 
-## Python Types
 
 ## Type mappings 
 
@@ -376,7 +375,7 @@ my_graph = load_npz("road-usad.npz")
 ranks = pagerank_module.do_pagerank(edges=my_graph, damp=0.85)
 
 ```
-The ranks which is of type `numpy.array(dtype=float)` can now be iterate over and it's values used for further processing. 
+The `ranks` variable which is of type `numpy.array(dtype=float)` can now be iterate over and it's values used for further processing. 
  
 
 
