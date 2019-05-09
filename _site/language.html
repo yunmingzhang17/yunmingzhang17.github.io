@@ -85,6 +85,19 @@ programs.</p>
     </ul>
   </li>
   <li><a href="#scheduling-language" id="markdown-toc-scheduling-language">Scheduling Language</a></li>
+  <li><a href="#python-binding" id="markdown-toc-python-binding">Python Binding</a>    <ul>
+      <li><a href="#graphit-language-extensions" id="markdown-toc-graphit-language-extensions">GraphIt language extensions</a></li>
+      <li><a href="#type-mappings" id="markdown-toc-type-mappings">Type mappings</a>        <ul>
+          <li><a href="#scalar-types-mappings" id="markdown-toc-scalar-types-mappings">Scalar types mappings</a></li>
+          <li><a href="#non-scalar-types-mappings" id="markdown-toc-non-scalar-types-mappings">Non-scalar types mappings</a></li>
+        </ul>
+      </li>
+      <li><a href="#python-module-api" id="markdown-toc-python-module-api">Python module API</a>        <ul>
+          <li><a href="#graphitgraphit_module" id="markdown-toc-graphitgraphit_module"><code class="highlighter-rouge">graphit.graphit_module</code></a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
 </ul>
 
 <h1 id="basics">Basics</h1>
@@ -333,6 +346,119 @@ end
 <h1 id="scheduling-language">Scheduling Language</h1>
 
 <p>For now, we refer users to the Section 5 of the <a href="https://arxiv.org/abs/1805.00923">arxiv report</a> on how to use the scheduling language.</p>
+
+<h1 id="python-binding">Python Binding</h1>
+
+<p>GraphIt provides bindings for the user to load and call GraphIt functions in python. The algorithm with it’s schedule can be written in a GraphIt file which can then be compiled and loaded using the GraphIt python module. 
+In this section we describe how to build such an interface and how the types from GraphIt translate to python types and vice-versa.</p>
+
+<h2 id="graphit-language-extensions">GraphIt language extensions</h2>
+
+<p>The main difference between writing GraphIt programs and writing functions to be called from python is that GraphIt now compiles as a library instead of an executable program. So it doesn’t contain a <code class="highlighter-rouge">main</code> function. Instead users can define any number of custom functions which can be separately invoked from python.</p>
+
+<p>To separate internal helper functions from the function which are exposed as a part of the library, we add the <code class="highlighter-rouge">export</code> keyword. This keyword can be added to any function declaration before the <code class="highlighter-rouge">func</code> keyword. This tells the compiler that this function is supposed to be a part of the library to be called from python and sufficient wrappers should be generated for the same.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>export func do_pagerank(edges: edgeset{Edge}, damp: double) -&gt; ranks: vector{Vertex}(float)
+  ...
+end
+</code></pre></div></div>
+
+<p>Notice how unlike the <code class="highlighter-rouge">main</code> function which doesn’t take any arguments, export functions can take arguments for the graph and the required parameters for the algorithm which can be directly passed from the python code.</p>
+
+<h2 id="type-mappings">Type mappings</h2>
+
+<p>The bindings allow user to pass and return python objects over to the GraphIt functions. Python types are translated to GraphIt types and vice-versa using the following mapping. This mapping has been chosen to keep data copy to the minimum to ensure high performance. 
+Just like regular python and GraphIt functions, the arguments are passed by reference and any modifications to non scalar types will reflect back in the python program. This feature can also be used if the user wishes to return multiple values.</p>
+
+<h3 id="scalar-types-mappings">Scalar types mappings</h3>
+
+<p>The scalar types in GrapIt directly map to their counterparts in python</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>GraphIt type</th>
+      <th>python type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="highlighter-rouge">int</code></td>
+      <td><code class="highlighter-rouge">int</code></td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">float</code></td>
+      <td><code class="highlighter-rouge">float</code></td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">long</code></td>
+      <td><code class="highlighter-rouge">long</code></td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">double</code></td>
+      <td><code class="highlighter-rouge">double</code></td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">bool</code></td>
+      <td><code class="highlighter-rouge">bool</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>GraphIt currently doesn’t have a <code class="highlighter-rouge">string</code> type. Hence <code class="highlighter-rouge">strings</code> cannot be passed or returned at this point.</p>
+
+<h3 id="non-scalar-types-mappings">Non-scalar types mappings</h3>
+
+<p>Following non-scalar types are currently supported as arguments and return values.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>GraphIt type</th>
+      <th>python type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="highlighter-rouge">edgeset{Edge}</code></td>
+      <td><code class="highlighter-rouge">scipy.sparse.csr_matrix</code></td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">vector{Veretex}(X)</code></td>
+      <td><code class="highlighter-rouge">numpy.array(dtype=X)</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Here <code class="highlighter-rouge">X</code> is any scalar type mapped according to the mappings in the previous section. For the types mentioned in this table, GraphIt guarantees that no data is copied by value.</p>
+
+<h2 id="python-module-api">Python module API</h2>
+
+<p>To fascilate the user to load GraphIt libraries inside python and call into them we provide a module named <code class="highlighter-rouge">graphit</code> that can be imported on installed systems as</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import graphit
+</code></pre></div></div>
+
+<p>This module provides mainly the <code class="highlighter-rouge">compile_and_load</code> function which returns a <code class="highlighter-rouge">graphit.graphit_module</code> object. This object has all the functions which are exported from the GraphIt program. 
+This function takes in as argument, the path of the GraphIt file to be loaded. The schedule can be either specified in the same file or can be supplied as a optional second argument. 
+The function also takes in an optional third argument which is an array of extra arguments to be supplied to the compiler while compiling the generated GraphIt code. This is useful for linking the GraphIt module with third party libraries.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import graphit
+pagerank_module = graphit.compile_and_load(algorithm="pagerank.gt", schedule="pagerank_schedule.gt", args=["-lm"])
+</code></pre></div></div>
+
+<h3 id="graphitgraphit_module"><code class="highlighter-rouge">graphit.graphit_module</code></h3>
+
+<p>The <code class="highlighter-rouge">graphit.graphit_module</code> type object provides an interface to call into exported GraphIt functions. The functions have the exact same name as it had in the GraphIt file. The arguments follow the same name and order.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from scipy.sparse import csr_matrix
+my_graph = load_npz("road-usad.npz")
+
+ranks = pagerank_module.do_pagerank(edges=my_graph, damp=0.85)
+
+</code></pre></div></div>
+<p>The <code class="highlighter-rouge">ranks</code> variable which is of type <code class="highlighter-rouge">numpy.array(dtype=float)</code> can now be iterate over and it’s values used for further processing.</p>
+
 
       </section>
     </div>
