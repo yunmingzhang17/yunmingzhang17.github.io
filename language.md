@@ -376,7 +376,7 @@ my_graph = load_npz("road-usad.npz")
 ranks = pagerank_module.do_pagerank(edges=my_graph, damp=0.85)
 
 ```
-The ranks which is of type `numpy.array(dtype=float)` can now be iterate over and it's values used for further processing. 
+The ranks which is of type `numpy.array(dtype=float)` can now be iterated over and its values used for further processing. 
  
 
 
