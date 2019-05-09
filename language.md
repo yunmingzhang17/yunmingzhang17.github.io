@@ -298,12 +298,86 @@ For now, we refer users to the Section 5 of the [arxiv report](https://arxiv.org
 
 # Python Binding
 
+GraphIt provides bindings for the user to load and call GraphIt functions in python. The algorithm with it's schedule can be written in a GraphIt file which can then be compiled and loaded using the GraphIt python module. 
+In this section we describe how to build such an interface and how the types from GraphIt translate to python types and vice-versa. 
+
+
+## GraphIt language extensions
+
+The main difference between writing GraphIt programs and writing functions to be called from python is that GraphIt now compiles as a library instead of an executable program. So it doesn't contain a `main` function. Instead users can define any number of custom functions which can be separately invoked from python. 
+
+To separate internal helper functions from the function which are exposed as a part of the library, we add the `exported` keyword. This keyword can be added to any function declaration before the `func` keyword. This tells the compiler that this function is supposed to be a part of the library to be called from python and sufficient wrappers should be generated for the same. 
+
+```
+exported func do_pagerank(edges: edgeset{Edge}, damp: double) -> ranks: vector{Vertex}(float)
+  ...
+end
+```
+
+Notice how unlike the `main` function which doesn't take any arguments, exported functions can take arguments for the graph and the required parameters for the algorithm which can be directly passed from the python code. 
 ## Python Types
 
-## GraphIt 
+## Type mappings 
 
-The programmer uses the "exported" keyword. 
+The bindings allow user to pass and return python objects over to the GraphIt functions. Python types are translated to GraphIt types and vice-versa using the following mapping. This mapping has been chosen to keep data copy to the minimum to ensure high performance. 
+Just like regular python and GraphIt functions, the arguments are passed by reference and any modifications to non scalar types will reflect back in the python program. This feature can also be used if the user wishes to return multiple values. 
 
-## Python API
+### Scalar types mappings
+
+The scalar types in GrapIt directly map to their counterparts in python
+
+| GraphIt type | python type |
+|--------------|-------------|
+| `int`          | `int`         |
+| `float`        | `float`       |
+| `long`         | `long`        |
+| `double`       | `double`      |
+| `bool`         | `bool`        |
+
+GraphIt currently doesn't have a `string` type. Hence `strings` cannot be passed or returned at this point. 
+
+
+### Non-scalar types mappings
+
+Following non-scalar types are currently supported as arguments and return values. 
+
+| GraphIt type | python type |
+|--------------|-------------|
+| `edgeset{Edge}` | `scipy.sparse.csr_matrix` |
+| `vector{Veretex}(X)` | `numpy.array(dtype=X)` | 
+
+Here `X` is any scalar type mapped according to the mappings in the previous section. For the types mentioned in this table, GraphIt guarantees that no data is copied by value. 
+
+## Python module API
+
+To fascilate the user to load GraphIt libraries inside python and call into them we provide a module named `graphit` that can be imported on installed systems as 
+
+```
+import graphit
+```
+
+This module provides mainly the `compile_and_load` function which returns a `graphit.graphit_module` object. This object has all the functions which are exported from the GraphIt program. 
+This function takes in as argument, the path of the GraphIt file to be loaded. The schedule can be either specified in the same file or can be supplied as a optional second argument. 
+The function also takes in an optional third argument which is an array of extra arguments to be supplied to the compiler while compiling the generated GraphIt code. This is useful for linking the GraphIt module with third party libraries.
+
+```
+import graphit
+pagerank_module = graphit.compile_and_load(algorithm="pagerank.gt", schedule="pagerank_schedule.gt", args=["-lm"])
+```
+
+### `graphit.graphit_module`
+
+The `graphit.graphit_module` type object provides an interface to call into exported GraphIt functions. The functions have the exact same name as it had in the GraphIt file. The arguments follow the same name and order. 
+
+```
+from scipy.sparse import csr_matrix
+my_graph = load_npz("road-usad.npz")
+
+ranks = pagerank_module.do_pagerank(edges=my_graph, damp=0.85)
+
+```
+The ranks which is of type `numpy.array(dtype=float)` can now be iterate over and it's values used for further processing. 
+ 
+
 
 
