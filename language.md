@@ -291,9 +291,9 @@ The apply operator is similar to the edgeset apply operator, but applied to a ve
 
 # Extern Functions
 
-The users can call functions implemented in C++ from GraphIt. These can be used in cases where the user needs some external functionalities that are not currently supported in the GraphIt language. For example, certain solvers or more complex operations that are not necessarily related to graphs. For example, a distance estimator used in AStar search. 
+The users can call functions implemented in C++ from GraphIt. These can be used in cases where the user needs some external functionalities that are not currently supported in the GraphIt language. For example, certain solvers or more complex operations that are not necessarily related to graphs. Another example could be a distance estimator used in AStar search. 
 
-The user needs to define a prototype of the function in the GraphIt program. The example below defined a extern function named "extern_func" that takes as input a vertex and outputs a double. 
+The user needs to define a prototype of the function in the GraphIt program with the `extern` keyworkd. The example below defined a extern function named `extern_func` that takes as input a vertex and outputs a double. 
 ```
 extern func extern_func(v: Vertex) -> output:double; 
 ```
@@ -317,6 +317,16 @@ double extern_func(v: NodeID){
 ##TODO How to Compile Extern Functions
 
 # Export Functions
+
+The GraphIt compiler generate a stand alone executable with a main function by default. However, the user can also generate a library version of the function that can be used in the Python binding or just a regular C++ function using the export functions.  
+
+To declare an export function, the user simply uses the `export` keyword before the function that is going to be exported. The following example shows the definition of an export function `export_func` that takes as input a graph named `input_edges`.
+
+```
+export func export_func(input_edges : edgeset{Edge}(Vertex,Vertex))
+  ...
+end
+```
 
 # Scheduling Language
 
