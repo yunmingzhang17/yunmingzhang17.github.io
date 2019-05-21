@@ -289,6 +289,35 @@ The filter operator is similar to the edgeset filter, except for it is applied o
 ### apply
 The apply operator is similar to the edgeset apply operator, but applied to a vertex. 
 
+# Extern Functions
+
+The users can call functions implemented in C++ from GraphIt. These can be used in cases where the user needs some external functionalities that are not currently supported in the GraphIt language. For example, certain solvers or more complex operations that are not necessarily related to graphs. For example, a distance estimator used in AStar search. 
+
+The user needs to define a prototype of the function in the GraphIt program. The example below defined a extern function named "extern_func" that takes as input a vertex and outputs a double. 
+```
+extern func extern_func(v: Vertex) -> output:double; 
+```
+
+The users can use the extern function inside any function and it can be supplied as arguments to vertexset and edgeset operators. For exmaple, the extern_func can be supplied to the apply operator on a vertexset. 
+
+```
+vertexset.apply(extern_func);
+```
+
+The users can also use vectors defined in the original GraphIt program inside the extern function. In the C++ definition of the extern programs, the user simply needs to declare an extern variable. The following example shows the definition of an extern function that reads a graphit_vector that is defined in the GraphIt program, and adds the value one to the vector for vertex v.  
+
+```
+extern double * graphit_vector;
+
+double extern_func(v: NodeID){
+  return graphit_vector[v] + 1;
+}
+```
+
+##TODO How to Compile Extern Functions
+
+# Export Functions
+
 # Scheduling Language
 
 For now, we refer users to the Section 5 of the [arxiv report](https://arxiv.org/abs/1805.00923) on how to use the scheduling language.  
