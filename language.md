@@ -328,6 +328,29 @@ export func export_func(input_edges : edgeset{Edge}(Vertex,Vertex))
 end
 ```
 
+If the graph is passed in as argument to the exported function, then the vertexsets and vectors cannot be initialized in the const declarations. This is because the size of the vertexset and edgesets are not known at compile time. In this case, the user would need to manually initialize vertexsets and vectors. If the graph is not loaded in as an argument to the export function, then the user can continue to load the graph, initialize the vertexsets and vectors in const declarations. 
+
+Here we show an example to initilize the vertexsets and vectors when the graph is an input argument to the `export_func`.
+
+```
+const edges : edgeset{Edge}(Vertex,Vertex);
+const vertices : vertexset{Vertex};
+const float_vector : vector{Vertex}(float);
+
+func initVector(v : Vertex)
+     float_vector[v] = 0.0;
+end
+
+export func export_func(input_edges : edgeset{Edge}(Vertex,Vertex))
+  edges = input_edges;
+  vertices = edges.getVertices();
+  float_vector = new vector{Vertex}(float)();
+  vertices.apply(initVector);
+end
+
+```
+
+
 # Scheduling Language
 
 For now, we refer users to the Section 5 of the [arxiv report](https://arxiv.org/abs/1805.00923) on how to use the scheduling language.  
