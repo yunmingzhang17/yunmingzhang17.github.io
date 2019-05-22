@@ -314,7 +314,12 @@ double extern_func(v: NodeID){
 }
 ```
 
-##TODO How to Compile Extern Functions
+To compile GraphIt programs, the user will first need to generate the C++ program with the GraphIt compiler. And later compile the generated file along with the other C++ file with the extern function. 
+
+```
+python graphitc.py -f graphit_file.gt -o graphit_generated.cpp 
+g++ -std=c++11 -O3 -g -I ../../src/runtime_lib/ graphit_generated.cpp extern_func.cpp -o executable 
+```
 
 # Export Functions
 
