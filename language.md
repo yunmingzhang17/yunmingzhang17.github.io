@@ -1,11 +1,13 @@
 ---
 layout: post
-## title: The GraphIt Programming Language 
-# The GraphIt Programming Language
+title: The GraphIt Programming Language 
+---
+The GraphIt Programming Language
+==============================
+
 {:.no_toc}
 
-This guide introduces GraphIt language features and shows how they can be used in
-programs. 
+This guide introduces GraphIt language features and shows how they can be used in programs. 
 
 
 * auto-gen TOC:

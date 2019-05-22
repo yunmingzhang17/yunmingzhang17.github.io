@@ -43,12 +43,12 @@
         <p><small>Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
       </footer>
       <section class="language-graphit">
-      <h1 class="no_toc" id="the-graphit-programming-language">The GraphIt Programming Language</h1>
+      <h1 id="the-graphit-programming-language">The GraphIt Programming Language</h1>
 
-<p>This guide introduces GraphIt language features and shows how they can be used in
-programs.</p>
+<p class="no_toc">This guide introduces GraphIt language features and shows how they can be used in programs.</p>
 
 <ul id="markdown-toc">
+  <li><a href="#the-graphit-programming-language" id="markdown-toc-the-graphit-programming-language">The GraphIt Programming Language</a></li>
   <li><a href="#basics" id="markdown-toc-basics">Basics</a>    <ul>
       <li><a href="#functions" id="markdown-toc-functions">Functions</a></li>
       <li><a href="#variables" id="markdown-toc-variables">Variables</a></li>
@@ -84,6 +84,9 @@ programs.</p>
       </li>
     </ul>
   </li>
+  <li><a href="#extern-functions" id="markdown-toc-extern-functions">Extern Functions</a></li>
+  <li><a href="#export-functions" id="markdown-toc-export-functions">Export Functions</a></li>
+  <li><a href="#library-rountines" id="markdown-toc-library-rountines">Library Rountines</a></li>
   <li><a href="#scheduling-language" id="markdown-toc-scheduling-language">Scheduling Language</a></li>
   <li><a href="#python-binding" id="markdown-toc-python-binding">Python Binding</a>    <ul>
       <li><a href="#graphit-language-extensions" id="markdown-toc-graphit-language-extensions">GraphIt language extensions</a></li>
@@ -343,9 +346,96 @@ end
 <h3 id="apply-1">apply</h3>
 <p>The apply operator is similar to the edgeset apply operator, but applied to a vertex.</p>
 
+<h1 id="extern-functions">Extern Functions</h1>
+
+<p>The users can call functions implemented in C++ from GraphIt. These can be used in cases where the user needs some external functionalities that are not currently supported in the GraphIt language. For example, certain solvers or more complex operations that are not necessarily related to graphs. Another example could be a distance estimator used in AStar search.</p>
+
+<p>The user needs to define a prototype of the function in the GraphIt program with the <code class="highlighter-rouge">extern</code> keyworkd. The example below defined a extern function named <code class="highlighter-rouge">extern_func</code> that takes as input a vertex and outputs a double.</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>extern func extern_func(v: Vertex) -&gt; output:double; 
+</code></pre></div></div>
+
+<p>The users can use the extern function inside any function and it can be supplied as arguments to vertexset and edgeset operators. For exmaple, the extern_func can be supplied to the apply operator on a vertexset.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vertexset.apply(extern_func);
+</code></pre></div></div>
+
+<p>The users can also use vectors defined in the original GraphIt program inside the extern function. In the C++ definition of the extern programs, the user simply needs to declare an extern variable. The following example shows the definition of an extern function that reads a graphit_vector that is defined in the GraphIt program, and adds the value one to the vector for vertex v.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>extern double * graphit_vector;
+
+double extern_func(v: NodeID){
+  return graphit_vector[v] + 1;
+}
+</code></pre></div></div>
+
+<p>##TODO How to Compile Extern Functions</p>
+
+<h1 id="export-functions">Export Functions</h1>
+
+<p>The GraphIt compiler generate a stand alone executable with a main function by default. However, the user can also generate a library version of the function that can be used in the Python binding or just a regular C++ function using the export functions.</p>
+
+<p>To declare an export function, the user simply uses the <code class="highlighter-rouge">export</code> keyword before the function that is going to be exported. The following example shows the definition of an export function <code class="highlighter-rouge">export_func</code> that takes as input a graph named <code class="highlighter-rouge">input_edges</code>.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>export func export_func(input_edges : edgeset{Edge}(Vertex,Vertex))
+  ...
+end
+</code></pre></div></div>
+
+<p>If the graph is passed in as argument to the exported function, then the vertexsets and vectors cannot be initialized in the const declarations. This is because the size of the vertexset and edgesets are not known at compile time. In this case, the user would need to manually initialize vertexsets and vectors. If the graph is not loaded in as an argument to the export function, then the user can continue to load the graph, initialize the vertexsets and vectors in const declarations.</p>
+
+<p>Here we show an example to initilize the vertexsets and vectors when the graph is an input argument to the <code class="highlighter-rouge">export_func</code>.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const edges : edgeset{Edge}(Vertex,Vertex);
+const vertices : vertexset{Vertex};
+const float_vector : vector{Vertex}(float);
+
+func initVector(v : Vertex)
+     float_vector[v] = 0.0;
+end
+
+export func export_func(input_edges : edgeset{Edge}(Vertex,Vertex))
+  edges = input_edges;
+  vertices = edges.getVertices();
+  float_vector = new vector{Vertex}(float)();
+  vertices.apply(initVector);
+end
+
+</code></pre></div></div>
+
+<h1 id="library-rountines">Library Rountines</h1>
+
 <h1 id="scheduling-language">Scheduling Language</h1>
 
-<p>For now, we refer users to the Section 5 of the <a href="https://arxiv.org/abs/1805.00923">arxiv report</a> on how to use the scheduling language.</p>
+<p>In this section, we provide some heuristics for tuning the schedules for improved performance. The scheduling language specified separately can tune the performance of the algorithm. The example below first described the algorithm with edgeset, vertexset, and the <code class="highlighter-rouge">main</code> function. The user can then use the <code class="highlighter-rouge">schedule:</code> keyword to mark the beginning of schedule spcification.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const edges : edgeset{Edge}(Vertex,Vertex);
+const vertices : vertexset{Vertex};
+const float_vector : vector{Vertex}(float);
+...
+
+func main ()
+  ...
+  #s1# edges.apply(updateEdge);
+  ...
+end
+
+schedule:
+  program-&gt;configApplyDirection("s1", "DensePull");
+  ...
+
+</code></pre></div></div>
+
+<p>The full set of schedules are listed in the table below. We refer users to the Section 5 of the <a href="https://arxiv.org/abs/1805.00923">arxiv report</a> for details of scheduling language.</p>
+
+<p><img src="gallery/SchedulingApply.png" alt="Scheduling Functions" /></p>
+
+<p>Here are some general guidelines for selecting a set of schedules</p>
+
+<p><strong>Step 1:</strong> Select a direction from SparsePush, DensePush, DensePull, SparsePush-DensePull with <code class="highlighter-rouge">configApplyDirection</code>. For large social networks that uses a frontier, SparsePush-DensePull is usually a good choice. For PageRank, DensePull is always the best. For road networks, SparsePush often is the best.     <br />
+<strong>Step 2:</strong> Select a parallelization strategy with <code class="highlighter-rouge">configApplyParallelization</code>. Usually dynamic-vertex-parallel is the best. For road networks, it might better to switch to static-vertex-parallel. Edge-aware-dynamic-vertex-parallel is only better for PageRank and Collaborative Filtering in some cases. <br />
+<strong>Step 3:</strong> Select a layout for Dense Vertex Set with <code class="highlighter-rouge">configApplyDenseVertexset</code>. if a DensePull direction is used, then you can potentially to use bitvector for the vertexset when the graph has a large number of vertices (currently only working for the pull direction). <br />
+<strong>Step 4:</strong> If a DensePull direction is used, then you can use <code class="highlighter-rouge">configNumSSG</code> (currently only working for the pull direction) to partition the graph for cache efficiency. This is mostly useful for applications that spend a large amount of time processing all the edges (PageRank, PageRankDelta, and Collaborative Filtering). This optimization is usually hurtful for application that only touch a subset of vertices (BFS, SSSP, BC).  Calculations for the number of segments is based on the last level cache (LLC) size. <br />
+<strong>Step 5:</strong> <code class="highlighter-rouge">fuseFields</code> fuses fields that are accessed together into array of structurs to reduce the number of random accesses. Only needed for PageRankDelta so far.</p>
 
 <h1 id="python-binding">Python Binding</h1>
 
@@ -457,7 +547,7 @@ my_graph = load_npz("road-usad.npz")
 ranks = pagerank_module.do_pagerank(edges=my_graph, damp=0.85)
 
 </code></pre></div></div>
-<p>The <code class="highlighter-rouge">ranks</code> variable which is of type <code class="highlighter-rouge">numpy.array(dtype=float)</code> can now be iterate over and it’s values used for further processing.</p>
+<p>The ranks which is of type <code class="highlighter-rouge">numpy.array(dtype=float)</code> can now be iterated over and its values used for further processing.</p>
 
 
       </section>
