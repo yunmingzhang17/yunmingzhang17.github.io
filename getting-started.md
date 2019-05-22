@@ -194,7 +194,7 @@ To compile a serial version, you can use reguar g++ with support of c++11 standa
  
 ```
     # assuming you are still in the bin directory under build/bin. If not, just do cd build/bin from the root of the directory
-    g++ -std=c++11 -I ../../src/runtime_lib/ test.cpp  -o -O3 test.o
+    g++ -std=c++11 -I ../../src/runtime_lib/ test.cpp  -O3 -o test.o
     ./test.o
 ```
 
