@@ -352,6 +352,10 @@ end
 
 # Library Rountines 
 
+* __getRandomOutNgh(v: Vertex)__
+* __getRandomInNgh(v: Vertex)__
+* __serialMinimumSpanningTree(graph : edgeset{Vertex, Vertex, int}, start_vertex : Vertex)__
+
 # Scheduling Language
 
 In this section, we provide some heuristics for tuning the schedules for improved performance. The scheduling language specified separately can tune the performance of the algorithm. The example below first described the algorithm with edgeset, vertexset, and the `main` function. The user can then use the `schedule:` keyword to mark the beginning of schedule spcification. 
@@ -381,11 +385,11 @@ The full set of schedules are listed in the table below. We refer users to the S
 
 Here are some general guidelines for selecting a set of schedules
 
-__Step 1:__ Select a direction from SparsePush, DensePush, DensePull, SparsePush-DensePull with `configApplyDirection`. For large social networks that uses a frontier, SparsePush-DensePull is usually a good choice. For PageRank, DensePull is always the best. For road networks, SparsePush often is the best.       
-__Step 2:__ Select a parallelization strategy with `configApplyParallelization`. Usually dynamic-vertex-parallel is the best. For road networks, it might better to switch to static-vertex-parallel. Edge-aware-dynamic-vertex-parallel is only better for PageRank and Collaborative Filtering in some cases.   
-__Step 3:__ Select a layout for Dense Vertex Set with `configApplyDenseVertexset`. if a DensePull direction is used, then you can potentially to use bitvector for the vertexset when the graph has a large number of vertices (currently only working for the pull direction).   
-__Step 4:__ If a DensePull direction is used, then you can use `configNumSSG` (currently only working for the pull direction) to partition the graph for cache efficiency. This is mostly useful for applications that spend a large amount of time processing all the edges (PageRank, PageRankDelta, and Collaborative Filtering). This optimization is usually hurtful for application that only touch a subset of vertices (BFS, SSSP, BC).  Calculations for the number of segments is based on the last level cache (LLC) size.   
-__Step 5:__ `fuseFields` fuses fields that are accessed together into array of structurs to reduce the number of random accesses. Only needed for PageRankDelta so far. 
+* __Step 1:__ Select a direction from SparsePush, DensePush, DensePull, SparsePush-DensePull with `configApplyDirection`. For large social networks that uses a frontier, SparsePush-DensePull is usually a good choice. For PageRank, DensePull is always the best. For road networks, SparsePush often is the best.       
+* __Step 2:__ Select a parallelization strategy with `configApplyParallelization`. Usually dynamic-vertex-parallel is the best. For road networks, it might better to switch to static-vertex-parallel. Edge-aware-dynamic-vertex-parallel is only better for PageRank and Collaborative Filtering in some cases.   
+* __Step 3:__ Select a layout for Dense Vertex Set with `configApplyDenseVertexset`. if a DensePull direction is used, then you can potentially to use bitvector for the vertexset when the graph has a large number of vertices (currently only working for the pull direction).   
+* __Step 4:__ If a DensePull direction is used, then you can use `configNumSSG` (currently only working for the pull direction) to partition the graph for cache efficiency. This is mostly useful for applications that spend a large amount of time processing all the edges (PageRank, PageRankDelta, and Collaborative Filtering). This optimization is usually hurtful for application that only touch a subset of vertices (BFS, SSSP, BC).  Calculations for the number of segments is based on the last level cache (LLC) size.   
+* __Step 5:__ `fuseFields` fuses fields that are accessed together into array of structurs to reduce the number of random accesses. Only needed for PageRankDelta so far. 
 
 # Python Binding
 
