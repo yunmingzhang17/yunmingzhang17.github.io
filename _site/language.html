@@ -368,7 +368,11 @@ double extern_func(v: NodeID){
 }
 </code></pre></div></div>
 
-<p>##TODO How to Compile Extern Functions</p>
+<p>To compile GraphIt programs, the user will first need to generate the C++ program with the GraphIt compiler. And later compile the generated file along with the other C++ file with the extern function.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python graphitc.py -f graphit_file.gt -o graphit_generated.cpp 
+g++ -std=c++11 -O3 -g -I ../../src/runtime_lib/ graphit_generated.cpp extern_func.cpp -o executable 
+</code></pre></div></div>
 
 <h1 id="export-functions">Export Functions</h1>
 
@@ -414,6 +418,8 @@ end
 
 <p>In this section, we provide some heuristics for tuning the schedules for improved performance. The scheduling language specified separately can tune the performance of the algorithm. The example below first described the algorithm with edgeset, vertexset, and the <code class="highlighter-rouge">main</code> function. The user can then use the <code class="highlighter-rouge">schedule:</code> keyword to mark the beginning of schedule spcification.</p>
 
+<p>The label <code class="highlighter-rouge">#s1#</code> is used in the scheduling commands to identify the apply operator the schedule is applied on. The label <code class="highlighter-rouge">#s1</code> must be specified before the edgeset apply operator if the user intend to tune the performance of the operator.</p>
+
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const edges : edgeset{Edge}(Vertex,Vertex);
 const vertices : vertexset{Vertex};
 const float_vector : vector{Vertex}(float);
@@ -444,6 +450,16 @@ schedule:
   <li><strong>Step 4:</strong> If a DensePull direction is used, then you can use <code class="highlighter-rouge">configNumSSG</code> (currently only working for the pull direction) to partition the graph for cache efficiency. This is mostly useful for applications that spend a large amount of time processing all the edges (PageRank, PageRankDelta, and Collaborative Filtering). This optimization is usually hurtful for application that only touch a subset of vertices (BFS, SSSP, BC).  Calculations for the number of segments is based on the last level cache (LLC) size.</li>
   <li><strong>Step 5:</strong> <code class="highlighter-rouge">fuseFields</code> fuses fields that are accessed together into array of structurs to reduce the number of random accesses. Only needed for PageRankDelta so far.</li>
 </ul>
+
+<p>Some existing schedules 
+There are many predfined schedules in the <a href="https://github.com/GraphIt-DSL/graphit/tree/master/test/input_with_schedules"><strong>input_with_schedules</strong> directory</a>. 
+For a specific graph and application, the <a href="https://github.com/GraphIt-DSL/graphit/blob/master/graphit_eval/eval/table7/benchmark.py#L16">script</a> shows the best schedule.</p>
+
+<p>In general, the following schedule achieves reasonable perforamnce on social networks.</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>schedule:
+    program-&gt;configApplyDirection("s1","SparsePush-DensePull");
+    program-&gt;configApplyParallelization("s1", "dynamic-vertex-parallel");
+</code></pre></div></div>
 
 <h1 id="python-binding">Python Binding</h1>
 

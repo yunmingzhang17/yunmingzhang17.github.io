@@ -365,6 +365,8 @@ end
 
 In this section, we provide some heuristics for tuning the schedules for improved performance. The scheduling language specified separately can tune the performance of the algorithm. The example below first described the algorithm with edgeset, vertexset, and the `main` function. The user can then use the `schedule:` keyword to mark the beginning of schedule spcification. 
 
+The label `#s1#` is used in the scheduling commands to identify the apply operator the schedule is applied on. The label `#s1` must be specified before the edgeset apply operator if the user intend to tune the performance of the operator. 
+
 ```
 const edges : edgeset{Edge}(Vertex,Vertex);
 const vertices : vertexset{Vertex};
@@ -395,6 +397,17 @@ Here are some general guidelines for selecting a set of schedules
 * __Step 3:__ Select a layout for Dense Vertex Set with `configApplyDenseVertexset`. if a DensePull direction is used, then you can potentially to use bitvector for the vertexset when the graph has a large number of vertices (currently only working for the pull direction).   
 * __Step 4:__ If a DensePull direction is used, then you can use `configNumSSG` (currently only working for the pull direction) to partition the graph for cache efficiency. This is mostly useful for applications that spend a large amount of time processing all the edges (PageRank, PageRankDelta, and Collaborative Filtering). This optimization is usually hurtful for application that only touch a subset of vertices (BFS, SSSP, BC).  Calculations for the number of segments is based on the last level cache (LLC) size.   
 * __Step 5:__ `fuseFields` fuses fields that are accessed together into array of structurs to reduce the number of random accesses. Only needed for PageRankDelta so far. 
+
+Some existing schedules 
+There are many predfined schedules in the [__input_with_schedules__ directory](https://github.com/GraphIt-DSL/graphit/tree/master/test/input_with_schedules). 
+For a specific graph and application, the [script](https://github.com/GraphIt-DSL/graphit/blob/master/graphit_eval/eval/table7/benchmark.py#L16) shows the best schedule. 
+
+In general, the following schedule achieves reasonable perforamnce on social networks. 
+``` 
+schedule:
+    program->configApplyDirection("s1","SparsePush-DensePull");
+    program->configApplyParallelization("s1", "dynamic-vertex-parallel");
+```
 
 # Python Binding
 
