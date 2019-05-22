@@ -409,9 +409,9 @@ end
 <h1 id="library-rountines">Library Rountines</h1>
 
 <ul>
-  <li><strong>getRandomOutNgh(v: Vertex)</strong></li>
-  <li><strong>getRandomInNgh(v: Vertex)</strong></li>
-  <li><strong>serialMinimumSpanningTree(graph : edgeset{Vertex, Vertex, int}, start_vertex : Vertex)</strong></li>
+  <li><strong>getRandomOutNgh(v: Vertex)</strong>: Returns a random outgoing neighbor of the Vertex v.</li>
+  <li><strong>getRandomInNgh(v: Vertex)</strong>: Returns a random incoming neighbor of the Vertex v.</li>
+  <li><strong>serialMinimumSpanningTree(graph : edgeset{Vertex, Vertex, int}, start_vertex : Vertex)</strong>: This operator computes a serial Minimum Spanning Tree computation on the weighted graph <code class="highlighter-rouge">graph</code> from the <code class="highlighter-rouge">start_vertex</code>. It returns a vector of VertexIDs (integers). This vector contains the parent VertexID for each Vertex v.</li>
 </ul>
 
 <h1 id="scheduling-language">Scheduling Language</h1>
@@ -455,7 +455,7 @@ schedule:
 There are many predfined schedules in the <a href="https://github.com/GraphIt-DSL/graphit/tree/master/test/input_with_schedules"><strong>input_with_schedules</strong> directory</a>. 
 For a specific graph and application, the <a href="https://github.com/GraphIt-DSL/graphit/blob/master/graphit_eval/eval/table7/benchmark.py#L16">script</a> shows the best schedule.</p>
 
-<p>In general, the following schedule achieves reasonable perforamnce on social networks.</p>
+<p>In general, the following schedule achieves reasonable perforamnce on social networks (assuming the relevant edgeset apply operator is labeled with <code class="highlighter-rouge">#s1</code>).</p>
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>schedule:
     program-&gt;configApplyDirection("s1","SparsePush-DensePull");
     program-&gt;configApplyParallelization("s1", "dynamic-vertex-parallel");

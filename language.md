@@ -357,9 +357,9 @@ end
 
 # Library Rountines 
 
-* __getRandomOutNgh(v: Vertex)__
-* __getRandomInNgh(v: Vertex)__
-* __serialMinimumSpanningTree(graph : edgeset{Vertex, Vertex, int}, start_vertex : Vertex)__
+* __getRandomOutNgh(v: Vertex)__: Returns a random outgoing neighbor of the Vertex v. 
+* __getRandomInNgh(v: Vertex)__: Returns a random incoming neighbor of the Vertex v. 
+* __serialMinimumSpanningTree(graph : edgeset{Vertex, Vertex, int}, start_vertex : Vertex)__: This operator computes a serial Minimum Spanning Tree computation on the weighted graph `graph` from the `start_vertex`. It returns a vector of VertexIDs (integers). This vector contains the parent VertexID for each Vertex v. 
 
 # Scheduling Language
 
@@ -402,7 +402,7 @@ Some existing schedules
 There are many predfined schedules in the [__input_with_schedules__ directory](https://github.com/GraphIt-DSL/graphit/tree/master/test/input_with_schedules). 
 For a specific graph and application, the [script](https://github.com/GraphIt-DSL/graphit/blob/master/graphit_eval/eval/table7/benchmark.py#L16) shows the best schedule. 
 
-In general, the following schedule achieves reasonable perforamnce on social networks. 
+In general, the following schedule achieves reasonable perforamnce on social networks (assuming the relevant edgeset apply operator is labeled with `#s1`). 
 ``` 
 schedule:
     program->configApplyDirection("s1","SparsePush-DensePull");
