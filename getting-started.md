@@ -19,7 +19,56 @@ If you have not yet already please read the basic information on the [GraphIt La
 
 ### PageRankDelta Example
 
-<img src="gallery/PageRankDeltaCode.png" alt="Page Rank Delta Code using GraphIt">
+```
+element Vertex end
+element Edge end
+const edges : edgeset{Edge}(Vertex,Vertex) = load(argv[1]);
+const vertices : vertexset{Vertex} = edges.getVertices();
+const cur_rank : vector{Vertex}(float) = 0;
+const ngh_sum : vector{Vertex}(float) = 0.0;
+const delta : vector{Vertex}(float) = 1.0/vertices.size();
+const out_degree : vector {Vertex}(int) = edges.getOutDegrees();
+const damp : float = 0.85;
+const beta_score : float = (1.0-damp)/vertices.size();
+const epsilon2 : float = 0.1;
+const epsilon : float = 0.0000001;
+
+func updateEdge(src : Vertex, dst : Vertex)
+    ngh_sum[dst] += delta[src]/out_degree[src];
+end
+
+func updateVertexFirstRound(v : Vertex) -> output : bool
+    delta[v] = damp*(ngh_sum[v]) + beta_score;
+    cur_rank[v] += delta[v];
+    delta[v] = delta[v]-1.0/vertices.size();
+    output = (fabs(delta[v]) > epsilon2*cur_rank[v]);
+    ngh_sum[v] = 0;
+end
+
+func updateVertex(v : Vertex) -> output : bool
+   delta[v] = ngh_sum[v]*damp;
+   cur_rank[v] += delta[v];
+   ngh_sum[v] = 0;
+   output = fabs(delta[v]) > epsilon2*cur_rank[v];
+end
+
+func main()
+    var n : int = edges.getVertices();
+    var frontier : vertexset{Vertex} = new vertexset{Vertex}(n);
+    for i in 1:10
+        #s1# edges.from(frontier).apply(updateEdge);
+        var output : vertexset{Vertex};
+        if i == 1
+           output = vertices.filter(updateVertexFirstRound);
+        else
+           output = vertices.filter(updateVertex);
+        end
+        delete frontier;
+        frontier = output;
+    end
+    delete frontier;
+end
+```
 
 *This is the code of Page Rank Delta using Graphit*
 
