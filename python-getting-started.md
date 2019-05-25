@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Python BindingGetting Started
+title: Python Binding Getting Started
 ---
 Getting Started with Python Binding
 ===============
