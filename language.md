@@ -4,14 +4,16 @@ title: The GraphIt Programming Language
 ---
 The GraphIt Programming Language
 ==============================
+
 {:.no_toc}
 
-This guide introduces GraphIt language features and shows how they can be used in
-programs. 
+This guide introduces GraphIt language features and shows how they can be used in programs. 
 
 
 * auto-gen TOC:
 {:toc}
+
+
 
 # Basics
 GraphIt is an imperative language with statements, control flow, and high-level operators on sts of vertices ane edges. In this section, we describe some of the language's basic constructs.
@@ -287,6 +289,207 @@ The filter operator is similar to the edgeset filter, except for it is applied o
 ### apply
 The apply operator is similar to the edgeset apply operator, but applied to a vertex. 
 
+# Extern Functions
+
+The users can call functions implemented in C++ from GraphIt. These can be used in cases where the user needs some external functionalities that are not currently supported in the GraphIt language. For example, certain solvers or more complex operations that are not necessarily related to graphs. Another example could be a distance estimator used in AStar search. 
+
+The user needs to define a prototype of the function in the GraphIt program with the `extern` keyworkd. The example below defined a extern function named `extern_func` that takes as input a vertex and outputs a double. 
+```
+extern func extern_func(v: Vertex) -> output:double; 
+```
+
+The users can use the extern function inside any function and it can be supplied as arguments to vertexset and edgeset operators. For exmaple, the extern_func can be supplied to the apply operator on a vertexset. 
+
+```
+vertexset.apply(extern_func);
+```
+
+The users can also use vectors defined in the original GraphIt program inside the extern function. In the C++ definition of the extern programs, the user simply needs to declare an extern variable. The following example shows the definition of an extern function that reads a graphit_vector that is defined in the GraphIt program, and adds the value one to the vector for vertex v.  
+
+```
+extern double * graphit_vector;
+
+double extern_func(v: NodeID){
+  return graphit_vector[v] + 1;
+}
+```
+
+To compile GraphIt programs, the user will first need to generate the C++ program with the GraphIt compiler. And later compile the generated file along with the other C++ file with the extern function. 
+
+```
+python graphitc.py -f graphit_file.gt -o graphit_generated.cpp 
+g++ -std=c++11 -O3 -g -I ../../src/runtime_lib/ graphit_generated.cpp extern_func.cpp -o executable 
+```
+
+# Export Functions
+
+The GraphIt compiler generate a stand alone executable with a main function by default. However, the user can also generate a library version of the function that can be used in the Python binding or just a regular C++ function using the export functions.  
+
+To declare an export function, the user simply uses the `export` keyword before the function that is going to be exported. The following example shows the definition of an export function `export_func` that takes as input a graph named `input_edges`.
+
+```
+export func export_func(input_edges : edgeset{Edge}(Vertex,Vertex))
+  ...
+end
+```
+
+If the graph is passed in as argument to the exported function, then the vertexsets and vectors cannot be initialized in the const declarations. This is because the size of the vertexset and edgesets are not known at compile time. In this case, the user would need to manually initialize vertexsets and vectors. If the graph is not loaded in as an argument to the export function, then the user can continue to load the graph, initialize the vertexsets and vectors in const declarations. 
+
+Here we show an example to initilize the vertexsets and vectors when the graph is an input argument to the `export_func`.
+
+```
+const edges : edgeset{Edge}(Vertex,Vertex);
+const vertices : vertexset{Vertex};
+const float_vector : vector{Vertex}(float);
+
+func initVector(v : Vertex)
+     float_vector[v] = 0.0;
+end
+
+export func export_func(input_edges : edgeset{Edge}(Vertex,Vertex))
+  edges = input_edges;
+  vertices = edges.getVertices();
+  float_vector = new vector{Vertex}(float)();
+  vertices.apply(initVector);
+end
+
+```
+
+# Library Rountines 
+
+* __getRandomOutNgh(v: Vertex)__: Returns a random outgoing neighbor of the Vertex v. 
+* __getRandomInNgh(v: Vertex)__: Returns a random incoming neighbor of the Vertex v. 
+* __serialMinimumSpanningTree(graph : edgeset{Vertex, Vertex, int}, start_vertex : Vertex)__: This operator computes a serial Minimum Spanning Tree computation on the weighted graph `graph` from the `start_vertex`. It returns a vector of VertexIDs (integers). This vector contains the parent VertexID for each Vertex v. 
+
 # Scheduling Language
 
-For now, we refer users to the Section 5 of the [arxiv report](https://arxiv.org/abs/1805.00923) on how to use the scheduling language.  
+In this section, we provide some heuristics for tuning the schedules for improved performance. The scheduling language specified separately can tune the performance of the algorithm. The example below first described the algorithm with edgeset, vertexset, and the `main` function. The user can then use the `schedule:` keyword to mark the beginning of schedule spcification. 
+
+The label `#s1#` is used in the scheduling commands to identify the apply operator the schedule is applied on. The label `#s1` must be specified before the edgeset apply operator if the user intend to tune the performance of the operator. 
+
+```
+const edges : edgeset{Edge}(Vertex,Vertex);
+const vertices : vertexset{Vertex};
+const float_vector : vector{Vertex}(float);
+...
+
+func main ()
+  ...
+  #s1# edges.apply(updateEdge);
+  ...
+end
+
+schedule:
+  program->configApplyDirection("s1", "DensePull");
+  ...
+
+```
+
+The full set of schedules are listed in the table below. We refer users to the Section 5 of the [arxiv report](https://arxiv.org/abs/1805.00923) for details of scheduling language. 
+
+<img src="gallery/SchedulingApply.png" alt="Scheduling Functions">
+
+
+Here are some general guidelines for selecting a set of schedules
+
+* __Step 1:__ Select a direction from SparsePush, DensePush, DensePull, SparsePush-DensePull with `configApplyDirection`. For large social networks that uses a frontier, SparsePush-DensePull is usually a good choice. For PageRank, DensePull is always the best. For road networks, SparsePush often is the best.       
+* __Step 2:__ Select a parallelization strategy with `configApplyParallelization`. Usually dynamic-vertex-parallel is the best. For road networks, it might better to switch to static-vertex-parallel. Edge-aware-dynamic-vertex-parallel is only better for PageRank and Collaborative Filtering in some cases.   
+* __Step 3:__ Select a layout for Dense Vertex Set with `configApplyDenseVertexset`. if a DensePull direction is used, then you can potentially to use bitvector for the vertexset when the graph has a large number of vertices (currently only working for the pull direction).   
+* __Step 4:__ If a DensePull direction is used, then you can use `configNumSSG` (currently only working for the pull direction) to partition the graph for cache efficiency. This is mostly useful for applications that spend a large amount of time processing all the edges (PageRank, PageRankDelta, and Collaborative Filtering). This optimization is usually hurtful for application that only touch a subset of vertices (BFS, SSSP, BC).  Calculations for the number of segments is based on the last level cache (LLC) size.   
+* __Step 5:__ `fuseFields` fuses fields that are accessed together into array of structurs to reduce the number of random accesses. Only needed for PageRankDelta so far. 
+
+Some existing schedules 
+There are many predfined schedules in the [__input_with_schedules__ directory](https://github.com/GraphIt-DSL/graphit/tree/master/test/input_with_schedules). 
+For a specific graph and application, the [script](https://github.com/GraphIt-DSL/graphit/blob/master/graphit_eval/eval/table7/benchmark.py#L16) shows the best schedule. 
+
+In general, the following schedule achieves reasonable perforamnce on social networks (assuming the relevant edgeset apply operator is labeled with `#s1`). 
+``` 
+schedule:
+    program->configApplyDirection("s1","SparsePush-DensePull");
+    program->configApplyParallelization("s1", "dynamic-vertex-parallel");
+```
+
+# Python Binding
+
+GraphIt provides bindings for the user to load and call GraphIt functions in python. The algorithm with it's schedule can be written in a GraphIt file which can then be compiled and loaded using the GraphIt python module. 
+In this section we describe how to build such an interface and how the types from GraphIt translate to python types and vice-versa. 
+
+
+## GraphIt language extensions
+
+The main difference between writing GraphIt programs and writing functions to be called from python is that GraphIt now compiles as a library instead of an executable program. So it doesn't contain a `main` function. Instead users can define any number of custom functions which can be separately invoked from python. 
+
+To separate internal helper functions from the function which are exposed as a part of the library, we add the `export` keyword. This keyword can be added to any function declaration before the `func` keyword. This tells the compiler that this function is supposed to be a part of the library to be called from python and sufficient wrappers should be generated for the same. 
+
+```
+export func do_pagerank(edges: edgeset{Edge}, damp: double) -> ranks: vector{Vertex}(float)
+  ...
+end
+```
+
+Notice how unlike the `main` function which doesn't take any arguments, export functions can take arguments for the graph and the required parameters for the algorithm which can be directly passed from the python code. 
+
+## Type mappings 
+
+The bindings allow user to pass and return python objects over to the GraphIt functions. Python types are translated to GraphIt types and vice-versa using the following mapping. This mapping has been chosen to keep data copy to the minimum to ensure high performance. 
+Just like regular python and GraphIt functions, the arguments are passed by reference and any modifications to non scalar types will reflect back in the python program. This feature can also be used if the user wishes to return multiple values. 
+
+### Scalar types mappings
+
+The scalar types in GrapIt directly map to their counterparts in python
+
+| GraphIt type | python type |
+|--------------|-------------|
+| `int`          | `int`         |
+| `float`        | `float`       |
+| `long`         | `long`        |
+| `double`       | `double`      |
+| `bool`         | `bool`        |
+
+GraphIt currently doesn't have a `string` type. Hence `strings` cannot be passed or returned at this point. 
+
+
+### Non-scalar types mappings
+
+Following non-scalar types are currently supported as arguments and return values. 
+
+| GraphIt type | python type |
+|--------------|-------------|
+| `edgeset{Edge}` | `scipy.sparse.csr_matrix` |
+| `vector{Veretex}(X)` | `numpy.array(dtype=X)` | 
+
+Here `X` is any scalar type mapped according to the mappings in the previous section. For the types mentioned in this table, GraphIt guarantees that no data is copied by value. 
+
+## Python module API
+
+To fascilate the user to load GraphIt libraries inside python and call into them we provide a module named `graphit` that can be imported on installed systems as 
+
+```
+import graphit
+```
+
+This module provides mainly the `compile_and_load` function which returns a `graphit.graphit_module` object. This object has all the functions which are exported from the GraphIt program. 
+This function takes in as argument, the path of the GraphIt file to be loaded. The schedule can be either specified in the same file or can be supplied as a optional second argument. 
+The function also takes in an optional third argument which is an array of extra arguments to be supplied to the compiler while compiling the generated GraphIt code. This is useful for linking the GraphIt module with third party libraries.
+
+```
+import graphit
+pagerank_module = graphit.compile_and_load(algorithm="pagerank.gt", schedule="pagerank_schedule.gt", args=["-lm"])
+```
+
+### `graphit.graphit_module`
+
+The `graphit.graphit_module` type object provides an interface to call into exported GraphIt functions. The functions have the exact same name as it had in the GraphIt file. The arguments follow the same name and order. 
+
+```
+from scipy.sparse import csr_matrix
+my_graph = load_npz("road-usad.npz")
+
+ranks = pagerank_module.do_pagerank(edges=my_graph, damp=0.85)
+
+```
+The ranks which is of type `numpy.array(dtype=float)` can now be iterated over and its values used for further processing. 
+ 
+
+
+
