@@ -110,26 +110,41 @@ func main()
 end
 </code></pre></div></div>
 
-<p><em>This is the code of Page Rank Delta using Graphit</em></p>
+<p><em>Page Rank Delta in Graphit</em></p>
 
-<p>Here we will go through an example of GraphIt Code using Page Rank Delta as an example. You can find this file under your graphit/apps folder also linked <a href="https://github.com/yunmingzhang17/graphit/tree/master/apps">here</a></p>
+<p>Here we will go through an example of GraphIt Code using Page Rank Delta as an example. You can find a variant of this PagerankDelta file, along with a few other appliations, under your graphit/apps folder <a href="https://github.com/yunmingzhang17/graphit/tree/master/apps">here</a>.</p>
 
-<p>Additionally here is a link to the <a href="https://arxiv.org/pdf/1805.00923.pdf">GraphIt paper.</a> Sections 4 and 5 give the complete breakdown of the Page Rank Delta code. Please look here if you want a more detailed breakdown of the functionality of Graphit.</p>
+<p>Additionally here is a link to the <a href="https://dl.acm.org/citation.cfm?id=3276491">GraphIt OOPSLA18 paper</a> or <a href="https://arxiv.org/pdf/1805.00923.pdf">the arxiv report here</a>.  Sections 4 and 5 give the complete breakdown of the Page Rank Delta code. Please look here if you want a more detailed breakdown of the functionality of Graphit.</p>
 
 <h3 id="algorithm-explanatation">Algorithm Explanatation</h3>
-<p><img src="gallery/PageRankDeltaElements1-2.png" alt="Page Rank Delta Code lines 1-2" /></p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>element Vertex end
+element Edge end
+</code></pre></div></div>
 
-<p><em>Page Rank Delta Code lines 1-2</em></p>
+<p><em>element definitions</em></p>
 
-<p>Here we construct the basic Elements that will be used by graphit. Most Graph Analysis Algorithms will require that you have both of these. GraphIt supports multiple types of user-defined vertices and edges, which is important for algorithms that work on multiple graphs.</p>
-
-<p><img src="gallery/PageRankDeltaConst3-11.png" alt="Page Rank Delta Code lines 3-11" /></p>
-
-<p><em>Page Rank Delta Code lines 3-11</em></p>
+<p>Here we construct the basic Elements, <code class="highlighter-rouge">Vertex</code> and <code class="highlighter-rouge">Edge</code> with the <code class="highlighter-rouge">element</code> keyword that will be used by graphit. Note these basic Elements do not have to be named ”Vertex” or “Edge”. Most Graph Algorithms will require that you have both of these. GraphIt supports multiple types of user-defined vertices and edges, which is important for algorithms that work on multiple graphs.</p>
 
 <p><a href="http://graphit-lang.org/language#variables">A quick refresher on Variables</a></p>
 
-<p>After defining element types, the programmer can construct vertexsets and edgesets. Lines 3–4 of Fig. 4 show the definitions of an edgeset, edges, and vertexset, vertices. Each element of the edgeset is of Edge type (specified between “{ }”), and the source and destination of the edge is of Vertex type (specified between “( )”). The edgeset declaration supports edges with different types of source and destination vertices (e.g., in a bipartite graph). vertices uses the getVertices method on the edgeset to obtain the union of source and destination vertices of edges. Data for vertices and edges are defined as vectors associated with an element type denoted using the { } syntax (Lines 8–11).</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const edges : edgeset{Edge}(Vertex,Vertex) = load(argv[1]);
+const vertices : vertexset{Vertex} = edges.getVertices();
+</code></pre></div></div>
+
+<p><em>vertexset and edgeset definitions</em></p>
+
+<p>After defining element types, the programmer can construct vertexsets and edgesets. Lines 3–4 of Fig. 4 show the definitions of an edgeset, <code class="highlighter-rouge">edges</code>, and vertexset, <code class="highlighter-rouge">vertices</code>. Each element of the edgeset is of <code class="highlighter-rouge">Edge</code> type (specified between “{ }”), and the source and destination of the edge is of <code class="highlighter-rouge">Vertex</code> type (specified between “( )”). The edgeset declaration supports edges with different types of source and destination vertices (e.g., in a bipartite graph). vertices uses the <code class="highlighter-rouge">getVertices()</code> method on the edgeset, <code class="highlighter-rouge">edges</code>, to obtain the union of source and destination vertices of edges. The <code class="highlighter-rouge">const</code> keyword simply says this vertexset, edgeset, or vector is globally accessible.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const cur_rank : vector{Vertex}(float) = 0;
+const ngh_sum : vector{Vertex}(float) = 0.0;
+const delta : vector{Vertex}(float) = 1.0/vertices.size();
+const out_degree : vector {Vertex}(int) = edges.getOutDegrees();
+</code></pre></div></div>
+<p><em>vector definitions</em></p>
+
+<p>Data for vertices and edges are defined as vectors associated with an element type denoted using the { } syntax. For example, <code class="highlighter-rouge">cur_rank</code> is associated with <code class="highlighter-rouge">Vertex</code>, and is of type <code class="highlighter-rouge">float</code> (specified in the ( ) parenthesis). This is similar to fields of a struct in C or C++, but is stored as a separate vector.</p>
+
+<p>When using <code class="highlighter-rouge">export</code> functions, the edgesets, vertexsets, vectors would need to be explicitly allocated by the user, as documented <a href="language#export-functions">here</a>.</p>
 
 <p><img src="gallery/PageRankDeltaFuncs.png" alt="Page Rank Delta Code lines 12-27" /></p>
 

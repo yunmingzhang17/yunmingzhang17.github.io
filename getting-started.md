@@ -70,27 +70,44 @@ func main()
 end
 ```
 
-*This is the code of Page Rank Delta using Graphit*
+*Page Rank Delta in Graphit*
 
-Here we will go through an example of GraphIt Code using Page Rank Delta as an example. You can find this file under your graphit/apps folder also linked [here](https://github.com/yunmingzhang17/graphit/tree/master/apps)
+Here we will go through an example of GraphIt Code using Page Rank Delta as an example. You can find a variant of this PagerankDelta file, along with a few other appliations, under your graphit/apps folder [here](https://github.com/yunmingzhang17/graphit/tree/master/apps). 
 
-Additionally here is a link to the [GraphIt paper.](https://arxiv.org/pdf/1805.00923.pdf) Sections 4 and 5 give the complete breakdown of the Page Rank Delta code. Please look here if you want a more detailed breakdown of the functionality of Graphit.
+Additionally here is a link to the [GraphIt OOPSLA18 paper](https://dl.acm.org/citation.cfm?id=3276491) or [the arxiv report here](https://arxiv.org/pdf/1805.00923.pdf).  Sections 4 and 5 give the complete breakdown of the Page Rank Delta code. Please look here if you want a more detailed breakdown of the functionality of Graphit.
 
 ###      Algorithm Explanatation
-<img src="gallery/PageRankDeltaElements1-2.png" alt="Page Rank Delta Code lines 1-2">
+```
+element Vertex end
+element Edge end
+```
 
-_Page Rank Delta Code lines 1-2_
+_element definitions_
 
-Here we construct the basic Elements that will be used by graphit. Most Graph Analysis Algorithms will require that you have both of these. GraphIt supports multiple types of user-defined vertices and edges, which is important for algorithms that work on multiple graphs.
-
-<img src="gallery/PageRankDeltaConst3-11.png" alt="Page Rank Delta Code lines 3-11">
-
-*Page Rank Delta Code lines 3-11*
+Here we construct the basic Elements, `Vertex` and `Edge` with the `element` keyword that will be used by graphit. Note these basic Elements do not have to be named ”Vertex" or "Edge". Most Graph Algorithms will require that you have both of these. GraphIt supports multiple types of user-defined vertices and edges, which is important for algorithms that work on multiple graphs.
 
 [A quick refresher on Variables](http://graphit-lang.org/language#variables)
 
-After defining element types, the programmer can construct vertexsets and edgesets. Lines 3–4 of Fig. 4 show the definitions of an edgeset, edges, and vertexset, vertices. Each element of the edgeset is of Edge type (specified between “{ }”), and the source and destination of the edge is of Vertex type (specified between “( )”). The edgeset declaration supports edges with different types of source and destination vertices (e.g., in a bipartite graph). vertices uses the getVertices method on the edgeset to obtain the union of source and destination vertices of edges. Data for vertices and edges are defined as vectors associated with an element type denoted using the { } syntax (Lines 8–11).
+```
+const edges : edgeset{Edge}(Vertex,Vertex) = load(argv[1]);
+const vertices : vertexset{Vertex} = edges.getVertices();
+```
 
+*vertexset and edgeset definitions*
+
+After defining element types, the programmer can construct vertexsets and edgesets. Lines 3–4 of Fig. 4 show the definitions of an edgeset, `edges`, and vertexset, `vertices`. Each element of the edgeset is of `Edge` type (specified between “{ }”), and the source and destination of the edge is of `Vertex` type (specified between “( )”). The edgeset declaration supports edges with different types of source and destination vertices (e.g., in a bipartite graph). vertices uses the `getVertices()` method on the edgeset, `edges`, to obtain the union of source and destination vertices of edges. The `const` keyword simply says this vertexset, edgeset, or vector is globally accessible. 
+
+```
+const cur_rank : vector{Vertex}(float) = 0;
+const ngh_sum : vector{Vertex}(float) = 0.0;
+const delta : vector{Vertex}(float) = 1.0/vertices.size();
+const out_degree : vector {Vertex}(int) = edges.getOutDegrees();
+```
+*vector definitions*
+
+Data for vertices and edges are defined as vectors associated with an element type denoted using the { } syntax. For example, `cur_rank` is associated with `Vertex`, and is of type `float` (specified in the ( ) parenthesis). This is similar to fields of a struct in C or C++, but is stored as a separate vector. 
+
+When using `export` functions, the edgesets, vertexsets, vectors would need to be explicitly allocated by the user, as documented [here](language#export-functions). 
 
 <img src="gallery/PageRankDeltaFuncs.png" alt="Page Rank Delta Code lines 12-27">
 
