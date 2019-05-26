@@ -46,6 +46,29 @@
       <section class="language-graphit">
       <h1 id="getting-started">Getting Started</h1>
 
+<p class="no_toc">This guide introduces GraphIt language features with the PagerankDelta algorithm.</p>
+
+<ul id="markdown-toc">
+  <li><a href="#getting-started" id="markdown-toc-getting-started">Getting Started</a>    <ul>
+      <li><a href="#downloading-software" id="markdown-toc-downloading-software">Downloading software</a></li>
+      <li><a href="#cloning-graphit" id="markdown-toc-cloning-graphit">Cloning graphit</a></li>
+      <li><a href="#basic-variables-constructs-and-functions" id="markdown-toc-basic-variables-constructs-and-functions">Basic Variables, Constructs, and Functions</a>        <ul>
+          <li><a href="#pagerankdelta-example" id="markdown-toc-pagerankdelta-example">PageRankDelta Example</a></li>
+          <li><a href="#algorithm-explanatation" id="markdown-toc-algorithm-explanatation">Algorithm Explanatation</a></li>
+          <li><a href="#scheduling-explanatation" id="markdown-toc-scheduling-explanatation">Scheduling Explanatation</a></li>
+        </ul>
+      </li>
+      <li><a href="#performance-tuning-with-the-scheduling-language" id="markdown-toc-performance-tuning-with-the-scheduling-language">Performance Tuning with the Scheduling Language</a></li>
+      <li><a href="#compiling" id="markdown-toc-compiling">Compiling</a>        <ul>
+          <li><a href="#build-graphit" id="markdown-toc-build-graphit">Build Graphit</a></li>
+          <li><a href="#compile-graphit-programs" id="markdown-toc-compile-graphit-programs">Compile GraphIt Programs</a></li>
+          <li><a href="#compiling-and-using-graphit" id="markdown-toc-compiling-and-using-graphit">Compiling and Using GraphIt</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
 <h2 id="downloading-software">Downloading software</h2>
 <p>Make sure you have all the correct Open Source Software installed. First follow the <a href="https://github.com/yunmingzhang17/graphit">README</a> file here to clone and install graphIt. You will need either CILK or OPENMP to allow you to run the C++ code in parallel. If you dont have either you can get both by simply downloading <a href="https://gcc.gnu.org/">GCC</a>. Alternatively if you already have CILK or OPENMP you can use those too. This tutorial will go through how to use GraphIt via both CILK and OPENMP.</p>
 
@@ -146,6 +169,15 @@ const out_degree : vector {Vertex}(int) = edges.getOutDegrees();
 
 <p>When using <code class="highlighter-rouge">export</code> functions, the edgesets, vertexsets, vectors would need to be explicitly allocated by the user, as documented <a href="language#export-functions">here</a>.</p>
 
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const damp : float = 0.85;
+const beta_score : float = (1.0-damp)/vertices.size();
+const epsilon2 : float = 0.1;
+const epsilon : float = 0.0000001;
+</code></pre></div></div>
+<p><em>scalar definitions</em></p>
+
+<p>Lastly, initialize all the scalar values needed for the program.</p>
+
 <p>Next we move on to take a look at the functions used in the program.</p>
 
 <p><a href="language#functions">A quick refresher on Functions</a></p>
@@ -221,7 +253,7 @@ The user has to explicitly manage the memory and swapping of the frontier with <
 
 <p>We use labels (#label#) in algorithm specifications to identify the statements on which optimizations apply. Programmers can assign a label on the left side of a statement and later reference it in the scheduling language. Above shows a simple schedule for the PageRankDelta implementation. The programmer adds label <code class="highlighter-rouge">s1</code> to the edgeset operation statement. After the <code class="highlighter-rouge">schedule</code> keyword, the programmer can make a series of calls with the scheduling functions.</p>
 
-<h2 id="tuning">Tuning</h2>
+<h2 id="performance-tuning-with-the-scheduling-language">Performance Tuning with the Scheduling Language</h2>
 
 <p>We designed GraphIt’s scheduling language functions to allow programmers to compose together edge traversal direction, frontier data structure, parallelization, cache optimizations, and NUMA optimizations discussed in the <a href="https://arxiv.org/pdf/1805.00923.pdf">paper</a>. To compose together different optimizations, the programmer first chooses a direction for traversal. Then the programmer can use the other scheduling functions to pick one option for the parallelization, graph partitioning, NUMA, and dense vertexset optimizations for the current direction. The programmer can configure each direction separately using the optional direction argument for hybrid directions (DensePush-SparsePush or DensePull-SparsePush). If no direction argument is specified, then the configuration applies to both directions.</p>
 

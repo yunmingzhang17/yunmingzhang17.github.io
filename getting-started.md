@@ -4,6 +4,14 @@ title: Getting Started
 ---
 Getting Started
 ===============
+
+{:.no_toc}
+
+This guide introduces GraphIt language features with the PagerankDelta algorithm.
+
+
+* auto-gen TOC:
+{:toc}
  
 ## Downloading software
 Make sure you have all the correct Open Source Software installed. First follow the [README](https://github.com/yunmingzhang17/graphit) file here to clone and install graphIt. You will need either CILK or OPENMP to allow you to run the C++ code in parallel. If you dont have either you can get both by simply downloading [GCC](https://gcc.gnu.org/). Alternatively if you already have CILK or OPENMP you can use those too. This tutorial will go through how to use GraphIt via both CILK and OPENMP.
@@ -109,6 +117,15 @@ Data for vertices and edges are defined as vectors associated with an element ty
 
 When using `export` functions, the edgesets, vertexsets, vectors would need to be explicitly allocated by the user, as documented [here](language#export-functions). 
 
+```
+const damp : float = 0.85;
+const beta_score : float = (1.0-damp)/vertices.size();
+const epsilon2 : float = 0.1;
+const epsilon : float = 0.0000001;
+```
+*scalar definitions*
+
+Lastly, initialize all the scalar values needed for the program. 
 
 Next we move on to take a look at the functions used in the program. 
 
@@ -193,7 +210,7 @@ In each iteration we update the `delta` values using the `updateEdge` function i
 
 We use labels (#label#) in algorithm specifications to identify the statements on which optimizations apply. Programmers can assign a label on the left side of a statement and later reference it in the scheduling language. Above shows a simple schedule for the PageRankDelta implementation. The programmer adds label `s1` to the edgeset operation statement. After the `schedule` keyword, the programmer can make a series of calls with the scheduling functions.
 
-## Tuning
+## Performance Tuning with the Scheduling Language
 
 We designed GraphIt’s scheduling language functions to allow programmers to compose together edge traversal direction, frontier data structure, parallelization, cache optimizations, and NUMA optimizations discussed in the [paper](https://arxiv.org/pdf/1805.00923.pdf). To compose together different optimizations, the programmer first chooses a direction for traversal. Then the programmer can use the other scheduling functions to pick one option for the parallelization, graph partitioning, NUMA, and dense vertexset optimizations for the current direction. The programmer can configure each direction separately using the optional direction argument for hybrid directions (DensePush-SparsePush or DensePull-SparsePush). If no direction argument is specified, then the configuration applies to both directions.
 

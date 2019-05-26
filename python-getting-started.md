@@ -32,7 +32,7 @@ const damp : float = 0.85;
 const beta_score : float;
 const epsilon2 : float = 0.1;
 const epsilon : float = 0.0000001;
-cost init_delta: flaot;
+cost init_delta: float;
 
 func updateEdge(src : Vertex, dst : Vertex)
     ngh_sum[dst] += delta[src]/out_degree[src];
@@ -137,7 +137,7 @@ const damp : float = 0.85;
 const beta_score : float;
 const epsilon2 : float = 0.1;
 const epsilon : float = 0.0000001;
-cost init_delta: flaot;
+cost init_delta: float;
 ```
 
 *scalar constants declaration* 
