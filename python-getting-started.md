@@ -4,6 +4,15 @@ title: Python Binding Getting Started
 ---
 Getting Started with Python Binding
 ===============
+{:.no_toc}
+## Overview
+This is a tutorial for getting started with GraphIt and using the python bindings to compile GraphIt programs as a library and call it from python. If you are looking for a tutorial on building GraphIt programs as standalone application, you can visit the [Standalone getting started](getting-started) tutorial. 
+
+In this tutorial we will write the PagerankDelta algorithm in GraphIt and run it from python on a graph loaded in python. We will also measure the performance of this algorithm from python. We will learn how to separate initialization from actual execution to get appropriate timing numbers. 
+This tutorial is broadly devided in the following sections - 
+
+* auto-gen TOC:
+{:toc}
  
 ## Downloading software
 Make sure you have all the correct Open Source Software installed. First follow the [README](https://github.com/yunmingzhang17/graphit) file here to clone and install graphIt. You will need either CILK or OPENMP to allow you to run the C++ code in parallel. If you dont have either you can get both by simply downloading [GCC](https://gcc.gnu.org/). Alternatively if you already have CILK or OPENMP you can use those too. This tutorial will go through how to use GraphIt via both CILK and OPENMP.
@@ -17,7 +26,7 @@ Clone graphit by going to [GraphIt](https://github.com/yunmingzhang17/graphit)
 
 If you have not yet already please read the basic information on the [GraphIt Language.](language)
 
-### PageRankDelta Example
+## PageRankDelta Example in GraphIt language
 
 ```
 element Vertex end
@@ -209,12 +218,15 @@ end
 *initialization functions*
 
 We now create the functions that will initialize the vectors and other variables that depend on the graph. Firstly, the `set_graph` function. Notice this function is marked with the `export` keyword, which means that this function is to be called from python and should be a part of the module loaded into python. This function takes 1 argument, which is the edgeset passed from the python code (as `scipy.sparse.csr_matrix`) and does not return anything. 
+You can read more about the `export` keyword and how the GraphIt types interface with the python types in the [export section](language#export-functions) of the language manual. 
 
 The first thing we initialize is the edgeset `edges` by assigning the passed in argument to it. We then initialize the vertexset `vertices` by using the `getVertices()` function from `edges`. This function returns the vertices from the graph passed in as argument. 
 
 We then allocate memory for the vectors associated with the vertices. This is okay to do now because the number of elements is known. We do the same for the variables `beta_score` and `init_delta`. The vector `out_degree` is initialized by calling the `getOutDegrees()` function from `edges`. 
 
 We initialize the values for the vectors by using a user defined function `initVectors`. This function takes in an argument the vertex to initialize and sets the initial value of the vectors for that vertex. We invoke this function on all the vertices in the `set_graph` function by using the `vertexset.apply` operator. 
+
+You should note here that we have created a separate `set_graph` function to isolate it from the actual algorithm in the `do_pagerank_delta` function. We do this so we can measure the performance of the actual algorithm and not the cost of initializing the graph related datastructures. If you are not timing the execution of the algorith, it is perfectly fine to add an arguement to the main `do_pagerank_delta` function and do all the initializations there. 
 
 Now, all the data structures are initialized and we are ready to actuall perfom the pagerank_delta operation. 
 
@@ -251,46 +263,7 @@ As you can see in line 32 for all the edges that exist in the frontier we apply 
 The vector `cur_rank` is returned by assigning it to the `output` variable. 
 
 ###  Scheduling Explanatation
-
-<img src="gallery/PageRankDeltaSchedule.png" alt="Page Rank Delta Schedule">
-
-*Page Rank Delta Code Schedule*
-
-We use labels (#label#) in algorithm specifications to identify the statements on which optimizations apply. Programmers can assign a label on the left side of a statement and later reference it in the scheduling language. Above shows a simple schedule for the PageRankDelta implementation. The programmer adds label s1 to the edgeset operation statement. After the schedule keyword, the programmer can make a series of calls with the scheduling functions.
-
-## Tuning
-
-We designed GraphIt’s scheduling language functions to allow programmers to compose together edge traversal direction, frontier data structure, parallelization, cache optimizations, and NUMA optimizations discussed in the [paper](https://arxiv.org/pdf/1805.00923.pdf). The configApplyDirection functions allow programmers to configure directions used for traversal. The programmer can use the configDenseVertexSet function to switch between bitvector and boolean array for either source or destination vertexset or both. The flexible configApplyNumSSG function configures the number of segmented subgraphs and how the subgraphs are partitioned (fixedvertex-count and edge-aware-vertex-count). 
-
-To compose together different optimizations, the programmer first chooses a direction for traversal. Then the programmer can use the other scheduling functions to pick one option for the parallelization, graph partitioning, NUMA, and dense vertexset optimizations for the current direction. The programmer can configure each direction separately using the optional direction argument for hybrid directions (DensePush-SparsePush or DensePull-SparsePush). If no direction argument is specified, then the configuration applies to both directions.
-
-Here is a list of Scheduling functions that you can use
-
-<img src="gallery/SchedulingApply.png" alt="Scheduling Functions">
-
-Below we will show how changing the Schedule affects the C++ generated Code. This first section of psuedo code is pageRankDelta code without a schedule.
-
-<img src="gallery/pageRankDeltaGeneratedCodeDefault.png" alt="Page Rank Delta C++ Generated Code">
-
-*This is the generated code for Page Rank Delta with no scheduling. This means that there are no optimizations. All this C++ code does is the basic page rank deltasum addition*
-
-<img src="gallery/pageRankDeltaGeneratedCodeDensePull.png" alt="Page Rank Delta C++ Generated Code">
-
-*With this Schedule program->configApplyDirection("s1", DensePull-SparsePush) the program is affecting the #s1# label associated with the code*
-'''
-edges.from(frontier).apply(updateEdge)
-'''
-*If the amount of edges exceeds a certain threshold then the program runs from destination to source. If it is under than it runs from source to destination. Depending on the density of the graph one option may run faster than the other.*
-
-<img src="gallery/pageRankDeltaGeneratedCodeDynamic.png" alt="Page Rank Delta C++ Generated Code">
-
-*Here by adding to the schedule the generated C++ is capable of running in parallel on multiple cores at once. This is seen by the parallel_for loop in the code and if that loop is run using CILK or OPENMV then it being run on mulitple cores will make the program much faster.*
-
-<img src="gallery/pageRankDeltaGeneratedCodeBitVector.png" alt="Page Rank Delta C++ Generated Code">
-
-*Adding this to the schedule will fuse vertexs together allowing them to be handled in groups. By doing this you will improve spatial locatility and this will improve your cache hit rate. However on the other hand this is require more processing. Thus depending on your algorithm using a bitvector may or may not be useful.*
-
-
+To learn how to use the scheduling functions with GraphIt, please visit the [scheduling section](getting-started#performance-tuning-with-the-scheduling-language) of the main getting-started document. 
 
 ## Using GraphIt code from Python. 
 
@@ -336,11 +309,11 @@ from scipy.sparse import csr_matrix
 import sys
 import time
 
-module = graphit.compile_and_load("pagerank_delta.gt") #You can provide here the full path of the GraphIt program we wrote above, in case it is not in the same directory
+module = graphit.compile_and_load("pagerank_delta_export.gt")
 graph = csr_matrix(scipy.io.mmread(sys.argv[1]))
 module.set_graph(graph)
 start_time = time.perf_counter()
-ranks = module.do_pogerank_delta()
+ranks = module.do_pagerank_delta()
 end_time = time.perf_counter()
 
 print ("Time elapsed = " + str(end_time - start_time) + " seconds")
@@ -348,7 +321,7 @@ print ("Time elapsed = " + str(end_time - start_time) + " seconds")
 
 We start by importing the `graphit` module. This module has tall the helper functions to compile and invoke Graphit functions. We also import the supporting libraries required to load the graph and time the computation. 
 
-We then ask the graphit module to load the GraphIt program we wrote using the `compile_and_load` function. We pass to it the path of the file we wrote above. This function returns a module that has all the functions we had exported form the GraphIt file. 
+We then ask the graphit module to load the GraphIt program we wrote using the `compile_and_load` function. We pass to it the path of the file we wrote above. This function returns a module that has all the functions we had exported form the GraphIt file. Notice that for the path, we have just provided `"pagerank_delta_export.gt"` because the file is in the same directory. But you should provide the full path here if it is in a different directory. 
 
 Next we laod the graph in the `scipy.sparse.csr_matrix` format. Assuming the graph is stored in the MatrixMarket format, we use the `scipy.io.mmread` function which returns the graph in the `scipy.sparse.coo_matrix` format. We convert it to the `csr_matrix` format and store it in the `graph` variable. We will be specifying the input graph file name at run time and hence we have used the `sys.argv[1]` as input file name.
 
@@ -383,6 +356,14 @@ and then running the command again -
 ```
 python3 pagerank_delta.py <path/to/graph.mtx>
 ```
+
+
+## Code examples
+All the code used in this tutorial is available at the following urls
+1. [pagerank_delta_export.gt](https://github.com/GraphIt-DSL/graphit/tree/master/apps/pagerank_delta_export.gt)
+2. [pagerank_delta.py](https://github.com/GraphIt-DSL/graphit/tree/master/apps/pagerank_delta.py)
+
+To reproduce these examples, you can just navigate to this directory and run the python command. Some example graphs are also provided in the [test/graphs](https://github.com/GraphIt-DSL/graphit/tree/master/test/graphs) directory. 
 <!--
 **For now all builds and compilations must be done in the graphit/build/bin directory due to linking and paths in the code. This will soon be updated so that users can compile anywhere but for now please do it in the bin.**
 
