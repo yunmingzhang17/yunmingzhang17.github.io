@@ -457,7 +457,7 @@ Following non-scalar types are currently supported as arguments and return value
 |--------------|-------------|
 | `edgeset{Edge}` | `scipy.sparse.csr_matrix` |
 | `vector{Vertex}(X)` | `numpy.array(dtype=X)` (shape = `(num_vertices)`) | 
-| `vector{Vertex}(vector[n](X)) | `numpy.array(dtype=X)` (shape = `(num_vertices, n)`) | 
+| `vector{Vertex}(vector[n](X))` | `numpy.array(dtype=X)` (shape = `(num_vertices, n)`) | 
 
 Here `X` is any scalar type mapped according to the mappings in the previous section. For the types mentioned in this table, GraphIt guarantees that no data is copied by value. 
 
