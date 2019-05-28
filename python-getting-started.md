@@ -279,16 +279,16 @@ To perform an out-of-tree build of Graphit do:
 
 After you have cloned the directory:
 ```
-                cd graphit
-                mkdir build
-                cd build
-                cmake ..
-                make
+cd graphit
+mkdir build
+cd build
+cmake ..
+make
 ```
 To run the C++ test suite do (all tests should pass):
 ```
-                cd build/bin
-                ./graphit_test
+cd build/bin
+./graphit_test
 ```
 To run the Python end-to-end test suite:
 
@@ -296,11 +296,11 @@ start at the top level graphit directory cloned from Github, NOT the build direc
 (All tests would pass, but some would generate error messages from the g++ compiler. This is expected.)
 Currently the project supports Python 2.x for the basic tests and Python 3.x (x >= 5) for the pybind test cases
 ``` 
-                cd build
-                python2 python_tests/test.py
-                python2 python_tests/test_with_schedules.py
-		export PYTHONPATH=.
-                python3 python_tests/pybind_test.py 
+cd build
+python2 python_tests/test.py
+python2 python_tests/test_with_schedules.py
+export PYTHONPATH=.
+python3 python_tests/pybind_test.py 
 ```
 
 ### Invoke GraphIt program from python
@@ -367,4 +367,8 @@ All the code used in this tutorial is available at the following urls
 1. [pagerank_delta_export.gt](https://github.com/GraphIt-DSL/graphit/tree/master/apps/pagerank_delta_export.gt)
 2. [pagerank_delta.py](https://github.com/GraphIt-DSL/graphit/tree/master/apps/pagerank_delta.py)
 
-To reproduce these examples, you can just navigate to this directory and run the python command. Some example graphs are also provided in the [test/graphs](https://github.com/GraphIt-DSL/graphit/tree/master/test/graphs) directory. 
+To reproduce these examples, you can just navigate to this directory and run the python command given below. Some example graphs are also provided in the [test/graphs](https://github.com/GraphIt-DSL/graphit/tree/master/test/graphs) directory. 
+
+```
+python3 pagerank_delta.py ../test/graphs/4.mtx
+```
