@@ -456,7 +456,8 @@ Following non-scalar types are currently supported as arguments and return value
 | GraphIt type | python type |
 |--------------|-------------|
 | `edgeset{Edge}` | `scipy.sparse.csr_matrix` |
-| `vector{Veretex}(X)` | `numpy.array(dtype=X)` | 
+| `vector{Vertex}(X)` | `numpy.array(dtype=X)` (shape = `(num_vertices)`) | 
+| `vector{Vertex}(vector[n](X)) | `numpy.array(dtype=X)` (shape = `(num_vertices, n)`) | 
 
 Here `X` is any scalar type mapped according to the mappings in the previous section. For the types mentioned in this table, GraphIt guarantees that no data is copied by value. 
 
@@ -469,12 +470,27 @@ import graphit
 ```
 
 This module provides mainly the `compile_and_load` function which returns a `graphit.graphit_module` object. This object has all the functions which are exported from the GraphIt program. 
-This function takes in as argument, the path of the GraphIt file to be loaded. The schedule can be either specified in the same file or can be supplied as a optional second argument. 
-The function also takes in an optional third argument which is an array of extra arguments to be supplied to the compiler while compiling the generated GraphIt code. This is useful for linking the GraphIt module with third party libraries.
+
+### `graphit.compile_and_load`
+
+```
+graphit.compile_and_load(graphit_source_file, extern_cpp_files=[], linker_args=[])
+```
+*Returns `graphit.graphit_module`*
+
+The `compile_and_load` function is the primary function for using the python bindings for graphit. This function compiles the algorithm in the supplied `.gt` file and loads it as a python module with all the exported functions. 
+
+`compile_and_load` takes a compulsory argument `graphit_source_file`. This is the relative/absolute path to the .gt file. The .gt file should contain both the algorithm and schedule if any. The schedule should be specified after the algorithm after the `schedule:` tag. 
+
+This function also takes an optional argument `extern_cpp_files`. If the algorithm needs to be linked with user provided .cpp files, they should be provided here as a list. This argument is necessary when using `extern` functions whose implementation is provided in a .cpp file. The list of files provided here will be compiled with appropriate GraphIt flag and linked with the module before loading. Note, you can only provide .cpp files here. Object files or static and shared libraries should not be provided here. They should be added to the `linker_args`. 
+
+The function also takes another optional argument `linker_args`, which is useful for providing extra arguments to the linker. These arguments are appended to the link command at the very end. Any extra object files or static/shared libraries can also be provided here. You should not provide .cpp files here because this command does not have appropriate compile flags. Source files should be provided with the `extern_cpp_files` argument. 
+
+The function returns a `graphit.graphit_module` object that has all the functions exported in the algorithm. 
 
 ```
 import graphit
-pagerank_module = graphit.compile_and_load(algorithm="pagerank.gt", schedule="pagerank_schedule.gt", args=["-lm"])
+pagerank_module = graphit.compile_and_load("pagerank.gt", linker_args=["-lm"])
 ```
 
 ### `graphit.graphit_module`
