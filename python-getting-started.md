@@ -41,7 +41,7 @@ const damp : float = 0.85;
 const beta_score : float;
 const epsilon2 : float = 0.1;
 const epsilon : float = 0.0000001;
-cost init_delta: float;
+const init_delta: float;
 
 func updateEdge(src : Vertex, dst : Vertex)
     ngh_sum[dst] += delta[src]/out_degree[src];
@@ -50,7 +50,7 @@ end
 func updateVertexFirstRound(v : Vertex) -> output : bool
     delta[v] = damp*(ngh_sum[v]) + beta_score;
     cur_rank[v] += delta[v];
-    delta[v] = delta[v]-1.0/vertices.size();
+    delta[v] = delta[v]-1.0/edges.getVertices();
     output = (fabs(delta[v]) > epsilon2*cur_rank[v]);
     ngh_sum[v] = 0;
 end
@@ -72,16 +72,16 @@ end
 export func set_graph(edges_args: edgeset{Edge}(Vertex, Vertex))
     edges = edges_args;
     vertices = edges.getVertices();
-    cur_rank = new Vector{Vertex}(float)();
-    ngh_sum = new Vector{Vertex}(float)();
-    delta = new Vector{Vertex}(float)();
+    cur_rank = new vector{Vertex}(float)();
+    ngh_sum = new vector{Vertex}(float)();
+    delta = new vector{Vertex}(float)();
     out_degree = edges.getOutDegrees();
     beta_score = (1.0 - damp) / edges.getVertices();
     init_delta = 1.0 / edges.getVertices();
     vertices.apply(initVectors);
 end
 
-export func do_pagerank_delta() -> output: vector{Vertex} (float)
+export func do_pagerank_delta() -> final_ranks: vector{Vertex} (float)
     var n : int = edges.getVertices();
     var frontier : vertexset{Vertex} = new vertexset{Vertex}(n);
     for i in 1:10
@@ -96,7 +96,7 @@ export func do_pagerank_delta() -> output: vector{Vertex} (float)
         frontier = output;
     end
     delete frontier;
-    output = cur_rank;
+    final_ranks = cur_rank;
 end
 ```
 
@@ -146,7 +146,7 @@ const damp : float = 0.85;
 const beta_score : float;
 const epsilon2 : float = 0.1;
 const epsilon : float = 0.0000001;
-cost init_delta: float;
+const init_delta: float;
 ```
 
 *scalar constants declaration* 
@@ -172,7 +172,7 @@ end
 func updateVertexFirstRound(v : Vertex) -> output : bool
     delta[v] = damp*(ngh_sum[v]) + beta_score;
     cur_rank[v] += delta[v];
-    delta[v] = delta[v]-1.0/vertices.size();
+    delta[v] = delta[v]-1.0/edges.getVertices();
     output = (fabs(delta[v]) > epsilon2*cur_rank[v]);
     ngh_sum[v] = 0;
 end
@@ -205,9 +205,9 @@ end
 export func set_graph(edges_args: edgeset{Edge}(Vertex, Vertex))
     edges = edges_args;
     vertices = edges.getVertices();
-    cur_rank = new Vector{Vertex}(float)();
-    ngh_sum = new Vector{Vertex}(float)();
-    delta = new Vector{Vertex}(float)();
+    cur_rank = new vector{Vertex}(float)();
+    ngh_sum = new vector{Vertex}(float)();
+    delta = new vector{Vertex}(float)();
     out_degree = edges.getOutDegrees();
     beta_score = (1.0 - damp) / edges.getVertices();
     init_delta = 1.0 / edges.getVertices();
@@ -231,7 +231,7 @@ You should note here that we have created a separate `set_graph` function to iso
 Now, all the data structures are initialized and we are ready to actuall perfom the pagerank_delta operation. 
 
 ```
-export func do_pagerank_delta() -> output: vector{Vertex} (float)
+export func do_pagerank_delta() -> final_ranks: vector{Vertex} (float)
     var n : int = edges.getVertices();
     var frontier : vertexset{Vertex} = new vertexset{Vertex}(n);
     for i in 1:10
@@ -246,7 +246,7 @@ export func do_pagerank_delta() -> output: vector{Vertex} (float)
         frontier = output;
     end
     delete frontier;
-    output = cur_rank;
+    final_ranks = cur_rank;
 end
 ```
 
@@ -260,7 +260,7 @@ The algorithm maintains the set of vertices whose rank has changed greatly from 
 
 As you can see in line 32 for all the edges that exist in the frontier we apply updateEdge. Then we generate a new set of vertices that are in the frontier. What Graphit allows us to do is create seperate functions for each part of the algorithm. In this case we have 2 general functions. One that updates the DeltaSum on each vertex and 2 that both determine if a Vertex should be in the Frontier. Then with graphit we can go in and optimize these specific parts functions without actually changing the code. All we need to do is change things in the scheduler. In this example we can modify #s1# and make the program run in parallel. 
 
-The vector `cur_rank` is returned by assigning it to the `output` variable. 
+The vector `cur_rank` is returned by assigning it to the `final_ranks` variable. 
 
 ###  Scheduling Explanatation
 To learn how to use the scheduling functions with GraphIt, please visit the [scheduling section](getting-started#performance-tuning-with-the-scheduling-language) of the main getting-started document. 
@@ -364,72 +364,3 @@ All the code used in this tutorial is available at the following urls
 2. [pagerank_delta.py](https://github.com/GraphIt-DSL/graphit/tree/master/apps/pagerank_delta.py)
 
 To reproduce these examples, you can just navigate to this directory and run the python command. Some example graphs are also provided in the [test/graphs](https://github.com/GraphIt-DSL/graphit/tree/master/test/graphs) directory. 
-<!--
-**For now all builds and compilations must be done in the graphit/build/bin directory due to linking and paths in the code. This will soon be updated so that users can compile anywhere but for now please do it in the bin.**
-
-The graphit/build/bin is the location that cmake generates its binary files which are the actual executables for you to run your code. This is why to run any code you need to do it in the bin directory because that is where all the needed files are. 
-
-GraphIt compiler currently generates a C++ output file from the .gt input GraphIt programs. 
-To compile an input GraphIt file with schedules in the same file (assuming the build directory is in the root project directory) do the following. The -f denotes the input file and the -o denotes the output file. 
-
-```
-    cd build/bin
-    python graphitc.py -f (input file path) -o (output file name)
-    
-```
-
-The following is an example:
-
-```
-    cd build/bin
-    python graphitc.py -f ../../test/input/simple_vector_sum.gt -o test.cpp
-    
-```
-
-To compile an input algorithm file and another separate schedule file (some of the test files have hardcoded paths to test inputs, be sure to modify that or change the directory you run the compiled files) do the following. -a in this case denotes a seperate algorithm.
-
-
-```
-    cd build/bin
-    python graphitc.py -a (algorithm file path) -f (schedule file path) -o (output file name)
-```
-
-The example below compiles the algorithm file (../../test/input/cc.gt), with a separate schedule file (../../test/input_with_schedules/cc_pull_parallel.gt)
-
-```
-    cd build/bin
-    python graphitc.py -a ../../test/input/cc.gt -f ../../test/input_with_schedules/cc_pull_parallel.gt -o test.cpp
-```
-
-All new files will be located inside the bin directory. You must make the files here but they can be run elsewhere. After you compile your C++ program you can insert it into your own program. 
-
-
-
-### Compiling and Using GraphIt
-
-To compile a serial version, you can use reguar g++ with support of c++11 standard to compile the generated C++ file (assuming it is named test.cpp).
- 
-```
-    # assuming you are still in the bin directory under build/bin. If not, just do cd build/bin from the root of the directory
-    g++ -std=c++11 -I ../../src/runtime_lib/ test.cpp  -O3 -o test.o
-    ./test.o
-```
-
-To compile a parallel version of the c++ program, you will need both CILK and OPENMP. OPENMP is required for programs using NUMA optimized schedule (configApplyNUMA enabled) and static parallel optimizations (static-vertex-parallel option in configApplyParallelization). All other programs can be compiled with CILK. For analyzing large graphs (e.g., twitter, friendster, webgraph) on NUMA machines, numacl -i all improves the parallel performance. For smaller graphs, such as LiveJournal and Road graphs, not using numactl can be faster. 
-
-```
-    # assuming you are still in the bin directory under build/bin. If not, just do cd build/bin from the root of the directory
-
-    # compile and run with CILK
-    icpc -std=c++11 -I ../../src/runtime_lib/ -DCILK test.cpp -O3 -o  test.o
-    numactl -i all ./test.o
-    
-    # compile and run with OPENMP
-    icpc -std=c++11 -I ../../src/runtime_lib/ -DOPENMP -qopenmp test.cpp -O3 -o test.o
-    numactl -i all ./test.o
-    
-    # to run with NUMA optimizations
-    OMP_PLACES=sockets ./test.o 
-    
-```
--->
