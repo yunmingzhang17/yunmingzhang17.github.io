@@ -6,7 +6,7 @@ Getting Started with Python Binding
 ===============
 {:.no_toc}
 ## Overview
-This is a tutorial for getting started with GraphIt and using the python bindings to compile GraphIt programs as a library and call it from python. If you are looking for a tutorial on building GraphIt programs as standalone application, you can visit the [Standalone getting started](getting-started) tutorial. 
+This is a tutorial for getting started with GraphIt and using the python bindings to compile GraphIt programs as a library and call it from python. If you are looking for a tutorial on building GraphIt programs as standalone application, you can visit the [Standalone Getting Started](getting-started) tutorial. 
 
 In this tutorial we will write the PagerankDelta algorithm in GraphIt and run it from python on a graph loaded in python. We will also measure the performance of this algorithm from python. We will learn how to separate initialization from actual execution to get appropriate timing numbers. 
 This tutorial is broadly devided in the following sections - 
@@ -102,7 +102,7 @@ end
 
 *Page Rank Delta in Graphit*
 
-Here we will go through an example of writing GraphIt code for the Page Rank Delta application and then calling it from python using the python bindings. You can find the code used in this example along with a few other applicaitons under graphit/apps directory [here] (https://github.com/yunmingzhang17/graphit/tree/master/apps). 
+Here we will go through an example of writing GraphIt code for the Page Rank Delta application and then calling it from python using the python bindings. You can find the code used in this example along with a few other applicaitons under graphit/apps directory [here](https://github.com/yunmingzhang17/graphit/tree/master/apps). 
 
 Additionally here is a link to the [GraphIt OOPSLA18 paper](https://dl.acm.org/citation.cfm?id=3276491) or [the arxiv report here](https://arxiv.org/pdf/1805.00923.pdf).  Sections 4 and 5 give the complete breakdown of the Page Rank Delta code. Please look here if you want a more detailed breakdown of the functionality of Graphit.
 
@@ -191,7 +191,7 @@ end
 
 `updateVertex` also takes in a vertex and returning a boolean. However in this case it does not add the base score to `delta` when determining Delta. Similarly then by comparing if the delta exceeded the threshold of epilson times the rank it outputs a True or False. 
 
-`updateVertexFirstRound` and `updateVertex` will be used later on to filter out the "active vertices". These are the vertices that will used in the next iteration of the algorithm. These active vertices are also known as the frontier. The reason for two functions is that the first time we update the vertexs some additional computation needs to be done as described above that isnt needed later on. Therefore the second function is run only once in the beginning of the algorithm.
+`updateVertexFirstRound` and `updateVertex` will be used later on to filter out the "active vertices". These are the vertices that will used in the next iteration of the algorithm. These active vertices are also known as the frontier. The reason for two functions is that the first time we update the vertexs some additional computation needs to be done as described above that isn't needed later on. Therefore the second function is run only once in the beginning of the algorithm.
 
 
 ```
@@ -222,7 +222,7 @@ You can read more about the `export` keyword and how the GraphIt types interface
 
 The first thing we initialize is the edgeset `edges` by assigning the passed in argument to it. We then initialize the vertexset `vertices` by using the `getVertices()` function from `edges`. This function returns the vertices from the graph passed in as argument. 
 
-We then allocate memory for the vectors associated with the vertices. This is okay to do now because the number of elements is known. We do the same for the variables `beta_score` and `init_delta`. The vector `out_degree` is initialized by calling the `getOutDegrees()` function from `edges`. 
+We then allocate memory for the vectors associated with the vertices with  `new Vector{Vertex}(float)()`. This is okay to do now because the number of elements is known. We do the same for the variables `beta_score` and `init_delta`. The vector `out_degree` is initialized by calling the `getOutDegrees()` function from `edges`. 
 
 We initialize the values for the vectors by using a user defined function `initVectors`. This function takes in an argument the vertex to initialize and sets the initial value of the vectors for that vertex. We invoke this function on all the vertices in the `set_graph` function by using the `vertexset.apply` operator. 
 
@@ -252,17 +252,21 @@ end
 
 *main function of PageRankDelta*
 
-This is where the entire program comes together and runs together with all the functions we created. Since the `do_pagerank_delta` function is to be invoked from the python code, it is marked with the `export` keyword. This function also returns a vector of floats associated with the vertices. This can be used inside the python code as a `numpy::array`. 
+The `main` function is where your program comes together and runs together with all the user-defined functions. Similar to C and C++, you have to explicitly name the function `main`. 
 
-What makes GraphIt great is that the language constructs of GraphIt separates edge processing logic from edge traversal, edge filtering (from, to, srcFilter, and dstFilter), atomic synchronization, and modified vertex deduplication and tracking logic (apply and applyModified). This separation enables the compiler to represent the algorithm from a high level, exposing opportunities for edge traversal and vertex data layout optimizations. Moreover, it frees the programmer from specifying low-level implementation details, such as synchronization and deduplication logic. 
+GraphIt is designed to separate edge processing logic from edge traversal, edge filtering (from, to, srcFilter, and dstFilter), atomic synchronization, and modified vertex deduplication and tracking logic (apply and applyModified). This separation enables the compiler to represent the algorithm from a high level, exposing opportunities for edge traversal and vertex data layout optimizations. Moreover, it frees the programmer from specifying low-level implementation details, such as synchronization and deduplication logic. 
 
-The algorithm maintains the set of vertices whose rank has changed greatly from previous iterations. This list of vertices is generated by the vertices.filter in lines 33 to 36. These vertices are known as the Frontier. We start with having all vertices in the frontier(line 29-30). On each iteration we update all the deltasums using the updateEdge function. We use the operator from to obtain the set of edges that we want to operate on. Then we use apply to use a function on them. 
+The algorithm iterates for 10 iterations to update each vertex's `cur_rank` value. The `cur_rank` is assumed to converge after 10 iterations, and represents the importance of each vertex based on its topological structure. In each iteration, the algorithm maintains the set of vertices whose rank has changed greatly from previous iterations, which is known as the `frontier`. We start with having all vertices in the frontier with frontier initalization ( `var frontier : vertexset{Vertex} = new vertexset{Vertex}(n);` ). The frontier generated by   
+`output = vertices.filter(updateVertexFirstRound)`  
+in the first iteration, which applies the `updateVertexFirstRound` function to all the `vertices`. In later iterations the frontier is generated by   
+`output = vertices.filter(updateVertex)`.   
+The user has to explicitly manage the memory and swapping of the frontier with `delete frontier; ` and `frontier = output;`
 
-As you can see in line 32 for all the edges that exist in the frontier we apply updateEdge. Then we generate a new set of vertices that are in the frontier. What Graphit allows us to do is create seperate functions for each part of the algorithm. In this case we have 2 general functions. One that updates the DeltaSum on each vertex and 2 that both determine if a Vertex should be in the Frontier. Then with graphit we can go in and optimize these specific parts functions without actually changing the code. All we need to do is change things in the scheduler. In this example we can modify #s1# and make the program run in parallel. 
+In each iteration we update the `delta` values using the `updateEdge` function in `#s1# edges.from(frontier).apply(updateEdge); `. We use the operator `from` to obtain the set of edges that comes out from the `frontier`. Then we use `apply `to apply the `updateEdge` function on these edges. The label `#s1` is used as a way to identify the edgeset operator for performance tuning using the scheduling. 
 
 The vector `cur_rank` is returned by assigning it to the `output` variable. 
 
-###  Scheduling Explanatation
+##  Scheduling Explanatation
 To learn how to use the scheduling functions with GraphIt, please visit the [scheduling section](getting-started#performance-tuning-with-the-scheduling-language) of the main getting-started document. 
 
 ## Using GraphIt code from Python. 
