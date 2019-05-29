@@ -367,7 +367,7 @@ All the code used in this tutorial is available at the following urls
 1. [pagerank_delta_export.gt](https://github.com/GraphIt-DSL/graphit/tree/master/apps/pagerank_delta_export.gt)
 2. [pagerank_delta.py](https://github.com/GraphIt-DSL/graphit/tree/master/apps/pagerank_delta.py)
 
-To reproduce these examples, you can just navigate to this directory and run the python command given below. Some example graphs are also provided in the [test/graphs](https://github.com/GraphIt-DSL/graphit/tree/master/test/graphs) directory. 
+To reproduce these examples, you can just navigate to the [apps](https://github.com/GraphIt-DSL/graphit/tree/master/apps) directory and run the python command given below. Some example graphs are also provided in the [test/graphs](https://github.com/GraphIt-DSL/graphit/tree/master/test/graphs) directory. 
 
 ```
 python3 pagerank_delta.py ../test/graphs/4.mtx
