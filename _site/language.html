@@ -75,6 +75,7 @@
           <li><a href="#srcfilter-and-dstfilter" id="markdown-toc-srcfilter-and-dstfilter">srcFilter and dstFilter</a></li>
           <li><a href="#apply" id="markdown-toc-apply">apply</a></li>
           <li><a href="#applymodified" id="markdown-toc-applymodified">applyModified</a></li>
+          <li><a href="#utility-functions" id="markdown-toc-utility-functions">Utility functions</a></li>
           <li><a href="#combining-edgeset-operators" id="markdown-toc-combining-edgeset-operators">combining edgeset operators</a></li>
         </ul>
       </li>
@@ -87,7 +88,7 @@
   </li>
   <li><a href="#extern-functions" id="markdown-toc-extern-functions">Extern Functions</a></li>
   <li><a href="#export-functions" id="markdown-toc-export-functions">Export Functions</a></li>
-  <li><a href="#library-rountines" id="markdown-toc-library-rountines">Library Rountines</a></li>
+  <li><a href="#library-functions" id="markdown-toc-library-functions">Library Functions</a></li>
   <li><a href="#scheduling-language" id="markdown-toc-scheduling-language">Scheduling Language</a></li>
   <li><a href="#python-binding" id="markdown-toc-python-binding">Python Binding</a>    <ul>
       <li><a href="#graphit-language-extensions" id="markdown-toc-graphit-language-extensions">GraphIt language extensions</a></li>
@@ -97,6 +98,7 @@
         </ul>
       </li>
       <li><a href="#python-module-api" id="markdown-toc-python-module-api">Python module API</a>        <ul>
+          <li><a href="#graphitcompile_and_load" id="markdown-toc-graphitcompile_and_load"><code class="highlighter-rouge">graphit.compile_and_load</code></a></li>
           <li><a href="#graphitgraphit_module" id="markdown-toc-graphitgraphit_module"><code class="highlighter-rouge">graphit.graphit_module</code></a></li>
         </ul>
       </li>
@@ -331,6 +333,13 @@ end
 
 </code></pre></div></div>
 
+<h3 id="utility-functions">Utility functions</h3>
+
+<ul>
+  <li><strong>getVertices(): -&gt; output : vertexset{Vertex}</strong> This returns a vertexset that is the union of source and destination nodes in the edgeset.</li>
+  <li><strong>getOutDegrees() -&gt; vector{Vertex}(int):</strong> This returns a vector of outdegrees for all the vertices in the graph.</li>
+</ul>
+
 <h3 id="combining-edgeset-operators">combining edgeset operators</h3>
 
 <p>The various operators can be and often are chained together.</p>
@@ -407,12 +416,14 @@ end
 
 </code></pre></div></div>
 
-<h1 id="library-rountines">Library Rountines</h1>
+<h1 id="library-functions">Library Functions</h1>
 
 <ul>
-  <li><strong>getRandomOutNgh(v: Vertex)</strong>: Returns a random outgoing neighbor of the Vertex v.</li>
-  <li><strong>getRandomInNgh(v: Vertex)</strong>: Returns a random incoming neighbor of the Vertex v.</li>
-  <li><strong>serialMinimumSpanningTree(graph : edgeset{Vertex, Vertex, int}, start_vertex : Vertex)</strong>: This operator computes a serial Minimum Spanning Tree computation on the weighted graph <code class="highlighter-rouge">graph</code> from the <code class="highlighter-rouge">start_vertex</code>. It returns a vector of VertexIDs (integers). This vector contains the parent VertexID for each Vertex v.</li>
+  <li><strong>getRandomOutNgh(v: Vertex)</strong>: This function returns a random outgoing neighbor of the Vertex v.</li>
+  <li><strong>getRandomInNgh(v: Vertex)</strong>: This function returns a random incoming neighbor of the Vertex v.</li>
+  <li><strong>serialMinimumSpanningTree(graph : edgeset{Vertex, Vertex, int}, start_vertex : Vertex) -&gt; output : vector{Vertex}(int)</strong>: This function computes a serial Minimum Spanning Tree computation on the weighted graph <code class="highlighter-rouge">graph</code> from the <code class="highlighter-rouge">start_vertex</code>. It returns a vector of VertexIDs (integers). This vector contains the parent VertexID for each Vertex v.</li>
+  <li><strong>serialSwepCut(g : edgeset{Edge}(Vertex, Vertex), vset : vertexset{Vertex}, val_array : vector{Vertex}(double)) -&gt; output : vertexset{Vertex}</strong>: This function computes a sweep cut on the vertices based on values supplied with the <code class="highlighter-rouge">val_array</code>, and returns a subset of the vertexset that belongs to one side of the cut. This is an operator for local graph clustering operations as documented <a href="https://arxiv.org/abs/1604.07515">here</a>.</li>
+  <li><strong>load(graph_file_name : string) -&gt; output : edgeset{Edge}(Vertex, Vertex)</strong>: This function returns an edgeset loaded from the external file. This can load either an unweighted or weighted file.</li>
 </ul>
 
 <h1 id="scheduling-language">Scheduling Language</h1>
@@ -539,13 +550,17 @@ Just like regular python and GraphIt functions, the arguments are passed by refe
       <td><code class="highlighter-rouge">scipy.sparse.csr_matrix</code></td>
     </tr>
     <tr>
-      <td><code class="highlighter-rouge">vector{Veretex}(X)</code></td>
-      <td><code class="highlighter-rouge">numpy.array(dtype=X)</code></td>
+      <td><code class="highlighter-rouge">vector{Vertex}(X)</code></td>
+      <td><code class="highlighter-rouge">numpy.array(dtype=X)</code> (shape = <code class="highlighter-rouge">(num_vertices)</code>)</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">vector{Vertex}(vector[n](X))</code></td>
+      <td><code class="highlighter-rouge">numpy.array(dtype=X)</code> (shape = <code class="highlighter-rouge">(num_vertices, n)</code>)</td>
     </tr>
   </tbody>
 </table>
 
-<p>Here <code class="highlighter-rouge">X</code> is any scalar type mapped according to the mappings in the previous section. For the types mentioned in this table, GraphIt guarantees that no data is copied by value.</p>
+<p>Here <code class="highlighter-rouge">X</code> is any scalar type mapped according to the mappings in the previous section.</p>
 
 <h2 id="python-module-api">Python module API</h2>
 
@@ -554,12 +569,30 @@ Just like regular python and GraphIt functions, the arguments are passed by refe
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import graphit
 </code></pre></div></div>
 
-<p>This module provides mainly the <code class="highlighter-rouge">compile_and_load</code> function which returns a <code class="highlighter-rouge">graphit.graphit_module</code> object. This object has all the functions which are exported from the GraphIt program. 
-This function takes in as argument, the path of the GraphIt file to be loaded. The schedule can be either specified in the same file or can be supplied as a optional second argument. 
-The function also takes in an optional third argument which is an array of extra arguments to be supplied to the compiler while compiling the generated GraphIt code. This is useful for linking the GraphIt module with third party libraries.</p>
+<p>This module provides mainly the <code class="highlighter-rouge">compile_and_load</code> function which returns a <code class="highlighter-rouge">graphit.graphit_module</code> object. This object has all the functions which are exported from the GraphIt program.</p>
+
+<h3 id="graphitcompile_and_load"><code class="highlighter-rouge">graphit.compile_and_load</code></h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>graphit.compile_and_load(graphit_source_file, extern_cpp_files=[], linker_args=[], parallelization_type=graphit.PARALLEL_NONE)
+</code></pre></div></div>
+<p><em>Returns <code class="highlighter-rouge">graphit.graphit_module</code></em></p>
+
+<p>The <code class="highlighter-rouge">compile_and_load</code> function is the primary function for using the python bindings for graphit. This function compiles the algorithm in the supplied <code class="highlighter-rouge">.gt</code> file and loads it as a python module with all the exported functions.</p>
+
+<p><code class="highlighter-rouge">compile_and_load</code> takes a compulsory argument <code class="highlighter-rouge">graphit_source_file</code>. This is the relative/absolute path to the .gt file. The .gt file should contain both the algorithm and schedule if any. The schedule should be specified after the algorithm after the <code class="highlighter-rouge">schedule:</code> tag.</p>
+
+<p>This function also takes an optional argument <code class="highlighter-rouge">extern_cpp_files</code>. If the algorithm needs to be linked with user provided .cpp files, they should be provided here as a list. This argument is necessary when using <code class="highlighter-rouge">extern</code> functions whose implementation is provided in a .cpp file. The list of files provided here will be compiled with appropriate GraphIt flag and linked with the module before loading. Note, you can only provide .cpp files here. Object files or static and shared libraries should not be provided here. They should be added to the <code class="highlighter-rouge">linker_args</code>.</p>
+
+<p>The function also takes another optional argument <code class="highlighter-rouge">linker_args</code>, which is useful for providing extra arguments to the linker. These arguments are appended to the link command at the very end. Any extra object files or static/shared libraries can also be provided here. You should not provide .cpp files here because this command does not have appropriate compile flags. Source files should be provided with the <code class="highlighter-rouge">extern_cpp_files</code> argument.</p>
+
+<p>Finally, the function takes an optional <code class="highlighter-rouge">parallelization_type</code> argument which can have the value <code class="highlighter-rouge">graphit.PARALLEL_NONE</code>, <code class="highlighter-rouge">graphit.PARALLEL_CILK</code> or <code class="highlighter-rouge">graphit.PARALLEL_OPENMP</code> (default is <code class="highlighter-rouge">graphit.PARALLEL_NONE</code>. This option allows the user to choose the parallelization runtime to use while compiling the GraphIt program.</p>
+
+<p>The function returns a <code class="highlighter-rouge">graphit.graphit_module</code> object that has all the functions exported in the algorithm.</p>
+
+<p><strong>Example with linker args</strong></p>
 
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import graphit
-pagerank_module = graphit.compile_and_load(algorithm="pagerank.gt", schedule="pagerank_schedule.gt", args=["-lm"])
+pagerank_module = graphit.compile_and_load("pagerank.gt", linker_args=["-lm"])
 </code></pre></div></div>
 
 <h3 id="graphitgraphit_module"><code class="highlighter-rouge">graphit.graphit_module</code></h3>
@@ -573,6 +606,26 @@ ranks = pagerank_module.do_pagerank(edges=my_graph, damp=0.85)
 
 </code></pre></div></div>
 <p>The ranks which is of type <code class="highlighter-rouge">numpy.array(dtype=float)</code> can now be iterated over and its values used for further processing.</p>
+
+<p><strong>Example with extern cpp files</strong></p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import graphit
+import scipy.io
+from scipy.sparse import csr_matrix
+src_add_one_module = graphit.compile_and_load("export_extern_simple_edgeset_apply.gt", extern_cpp_files=["extern_src_add_one.cpp"])
+
+my_graph = csr_matrix(scipy.io.mmread("4.mtx"))
+sum_returned = src_add_one_module.export_func(graph)
+</code></pre></div></div>
+
+<p>In this example, the <code class="highlighter-rouge">export_extern_simple_edgeset_apply.gt</code> file declares an <code class="highlighter-rouge">extern</code> function <code class="highlighter-rouge">extern_src_add_one</code> which takes a source and destination and performs an operation on the source node’s data. This function is called from the <code class="highlighter-rouge">edgeset.apply</code> operator. But the implementation of this function is not provided in the .gt file. It is provided as a cpp function in the cpp file <code class="highlighter-rouge">extern_src_add_one.cpp</code>. So we have provide a list containing the name of this file as the argument <code class="highlighter-rouge">extern_cpp_files</code>. This file is compiled separately when the module is compiled and linked in to the generated graphit module. If this argument is not provided, the compilation will fail with the linker error - <em>Undefined symbol: <code class="highlighter-rouge">extern_src_add_one</code></em>.</p>
+
+<p><strong>Example with the parallelization type flag</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import graphit
+pagerank_module = graphit.compile_and_load("pagerank.gt", linker_args=["-lm"], parallelization_type=graphit.PARALLEL_CILK)
+</code></pre></div></div>
+
+<p>In this example we provide the <code class="highlighter-rouge">parallelization_type</code> as <code class="highlighter-rouge">PARALLEL_CILK</code>. This instructs the GraphIt compiler to make use of the CILK runtime while compiling the module. If we had used the graphit.PARALLEL_NONE option (which is the default option), the compiled code would have ran serially.</p>
 
 
       </section>
