@@ -456,9 +456,10 @@ Following non-scalar types are currently supported as arguments and return value
 | GraphIt type | python type |
 |--------------|-------------|
 | `edgeset{Edge}` | `scipy.sparse.csr_matrix` |
-| `vector{Veretex}(X)` | `numpy.array(dtype=X)` | 
+| `vector{Vertex}(X)` | `numpy.array(dtype=X)` (shape = `(num_vertices)`) | 
+| `vector{Vertex}(vector[n](X))` | `numpy.array(dtype=X)` (shape = `(num_vertices, n)`) | 
 
-Here `X` is any scalar type mapped according to the mappings in the previous section. For the types mentioned in this table, GraphIt guarantees that no data is copied by value. 
+Here `X` is any scalar type mapped according to the mappings in the previous section. 
 
 ## Python module API
 
@@ -469,12 +470,31 @@ import graphit
 ```
 
 This module provides mainly the `compile_and_load` function which returns a `graphit.graphit_module` object. This object has all the functions which are exported from the GraphIt program. 
-This function takes in as argument, the path of the GraphIt file to be loaded. The schedule can be either specified in the same file or can be supplied as a optional second argument. 
-The function also takes in an optional third argument which is an array of extra arguments to be supplied to the compiler while compiling the generated GraphIt code. This is useful for linking the GraphIt module with third party libraries.
+
+### `graphit.compile_and_load`
+
+```
+graphit.compile_and_load(graphit_source_file, extern_cpp_files=[], linker_args=[], parallelization_type=graphit.PARALLEL_NONE)
+```
+*Returns `graphit.graphit_module`*
+
+The `compile_and_load` function is the primary function for using the python bindings for graphit. This function compiles the algorithm in the supplied `.gt` file and loads it as a python module with all the exported functions. 
+
+`compile_and_load` takes a compulsory argument `graphit_source_file`. This is the relative/absolute path to the .gt file. The .gt file should contain both the algorithm and schedule if any. The schedule should be specified after the algorithm after the `schedule:` tag. 
+
+This function also takes an optional argument `extern_cpp_files`. If the algorithm needs to be linked with user provided .cpp files, they should be provided here as a list. This argument is necessary when using `extern` functions whose implementation is provided in a .cpp file. The list of files provided here will be compiled with appropriate GraphIt flag and linked with the module before loading. Note, you can only provide .cpp files here. Object files or static and shared libraries should not be provided here. They should be added to the `linker_args`. 
+
+The function also takes another optional argument `linker_args`, which is useful for providing extra arguments to the linker. These arguments are appended to the link command at the very end. Any extra object files or static/shared libraries can also be provided here. You should not provide .cpp files here because this command does not have appropriate compile flags. Source files should be provided with the `extern_cpp_files` argument. 
+
+Finally, the function takes an optional `parallelization_type` argument which can have the value `graphit.PARALLEL_NONE`, `graphit.PARALLEL_CILK` or `graphit.PARALLEL_OPENMP` (default is `graphit.PARALLEL_NONE`. This option allows the user to choose the parallelization runtime to use while compiling the GraphIt program. 
+
+The function returns a `graphit.graphit_module` object that has all the functions exported in the algorithm. 
+
+__Example with linker args__
 
 ```
 import graphit
-pagerank_module = graphit.compile_and_load(algorithm="pagerank.gt", schedule="pagerank_schedule.gt", args=["-lm"])
+pagerank_module = graphit.compile_and_load("pagerank.gt", linker_args=["-lm"])
 ```
 
 ### `graphit.graphit_module`
@@ -491,5 +511,27 @@ ranks = pagerank_module.do_pagerank(edges=my_graph, damp=0.85)
 The ranks which is of type `numpy.array(dtype=float)` can now be iterated over and its values used for further processing. 
  
 
+
+__Example with extern cpp files__
+```
+import graphit
+import scipy.io
+from scipy.sparse import csr_matrix
+src_add_one_module = graphit.compile_and_load("export_extern_simple_edgeset_apply.gt", extern_cpp_files=["extern_src_add_one.cpp"])
+
+my_graph = csr_matrix(scipy.io.mmread("4.mtx"))
+sum_returned = src_add_one_module.export_func(graph)
+```
+
+In this example, the `export_extern_simple_edgeset_apply.gt` file declares an `extern` function `extern_src_add_one` which takes a source and destination and performs an operation on the source node's data. This function is called from the `edgeset.apply` operator. But the implementation of this function is not provided in the .gt file. It is provided as a cpp function in the cpp file `extern_src_add_one.cpp`. So we have provide a list containing the name of this file as the argument `extern_cpp_files`. This file is compiled separately when the module is compiled and linked in to the generated graphit module. If this argument is not provided, the compilation will fail with the linker error - *Undefined symbol: `extern_src_add_one`*.  
+
+__Example with the parallelization type flag__
+
+```
+import graphit
+pagerank_module = graphit.compile_and_load("pagerank.gt", linker_args=["-lm"], parallelization_type=graphit.PARALLEL_CILK)
+```
+
+In this example we provide the `parallelization_type` as `PARALLEL_CILK`. This instructs the GraphIt compiler to make use of the CILK runtime while compiling the module. If we had used the graphit.PARALLEL_NONE option (which is the default option), the compiled code would have ran serially. 
 
 

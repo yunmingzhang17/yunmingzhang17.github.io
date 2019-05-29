@@ -4,6 +4,14 @@ title: Getting Started
 ---
 Getting Started
 ===============
+
+{:.no_toc}
+
+This guide introduces GraphIt language features with the PagerankDelta algorithm.
+
+
+* auto-gen TOC:
+{:toc}
  
 ## Downloading software
 Make sure you have all the correct Open Source Software installed. First follow the [README](https://github.com/yunmingzhang17/graphit) file here to clone and install graphIt. You will need either CILK or OPENMP to allow you to run the C++ code in parallel. If you dont have either you can get both by simply downloading [GCC](https://gcc.gnu.org/). Alternatively if you already have CILK or OPENMP you can use those too. This tutorial will go through how to use GraphIt via both CILK and OPENMP.
@@ -19,56 +27,178 @@ If you have not yet already please read the basic information on the [GraphIt La
 
 ### PageRankDelta Example
 
-<img src="gallery/PageRankDeltaCode.png" alt="Page Rank Delta Code using GraphIt">
+```
+element Vertex end
+element Edge end
+const edges : edgeset{Edge}(Vertex,Vertex) = load(argv[1]);
+const vertices : vertexset{Vertex} = edges.getVertices();
+const cur_rank : vector{Vertex}(float) = 0;
+const ngh_sum : vector{Vertex}(float) = 0.0;
+const delta : vector{Vertex}(float) = 1.0/vertices.size();
+const out_degree : vector {Vertex}(int) = edges.getOutDegrees();
+const damp : float = 0.85;
+const beta_score : float = (1.0-damp)/vertices.size();
+const epsilon2 : float = 0.1;
+const epsilon : float = 0.0000001;
 
-*This is the code of Page Rank Delta using Graphit*
+func updateEdge(src : Vertex, dst : Vertex)
+    ngh_sum[dst] += delta[src]/out_degree[src];
+end
 
-Here we will go through an example of GraphIt Code using Page Rank Delta as an example. You can find this file under your graphit/apps folder also linked [here](https://github.com/yunmingzhang17/graphit/tree/master/apps)
+func updateVertexFirstRound(v : Vertex) -> output : bool
+    delta[v] = damp*(ngh_sum[v]) + beta_score;
+    cur_rank[v] += delta[v];
+    delta[v] = delta[v]-1.0/vertices.size();
+    output = (fabs(delta[v]) > epsilon2*cur_rank[v]);
+    ngh_sum[v] = 0;
+end
 
-Additionally here is a link to the [GraphIt paper.](https://arxiv.org/pdf/1805.00923.pdf) Sections 4 and 5 give the complete breakdown of the Page Rank Delta code. Please look here if you want a more detailed breakdown of the functionality of Graphit.
+func updateVertex(v : Vertex) -> output : bool
+   delta[v] = ngh_sum[v]*damp;
+   cur_rank[v] += delta[v];
+   ngh_sum[v] = 0;
+   output = fabs(delta[v]) > epsilon2*cur_rank[v];
+end
+
+func main()
+    var n : int = edges.getVertices();
+    var frontier : vertexset{Vertex} = new vertexset{Vertex}(n);
+    for i in 1:10
+        #s1# edges.from(frontier).apply(updateEdge);
+        var output : vertexset{Vertex};
+        if i == 1
+           output = vertices.filter(updateVertexFirstRound);
+        else
+           output = vertices.filter(updateVertex);
+        end
+        delete frontier;
+        frontier = output;
+    end
+    delete frontier;
+end
+```
+
+*Page Rank Delta in Graphit*
+
+Here we will go through an example of GraphIt Code using Page Rank Delta as an example. You can find a variant of this PagerankDelta file, along with a few other appliations, under your graphit/apps folder [here](https://github.com/yunmingzhang17/graphit/tree/master/apps). 
+
+Additionally here is a link to the [GraphIt OOPSLA18 paper](https://dl.acm.org/citation.cfm?id=3276491) or [the arxiv report here](https://arxiv.org/pdf/1805.00923.pdf).  Sections 4 and 5 give the complete breakdown of the Page Rank Delta code. Please look here if you want a more detailed breakdown of the functionality of Graphit.
 
 ###      Algorithm Explanatation
-<img src="gallery/PageRankDeltaElements1-2.png" alt="Page Rank Delta Code lines 1-2">
+```
+element Vertex end
+element Edge end
+```
 
-_Page Rank Delta Code lines 1-2_
+_element definitions_
 
-Here we construct the basic Elements that will be used by graphit. Most Graph Analysis Algorithms will require that you have both of these. GraphIt supports multiple types of user-defined vertices and edges, which is important for algorithms that work on multiple graphs.
-
-<img src="gallery/PageRankDeltaConst3-11.png" alt="Page Rank Delta Code lines 3-11">
-
-*Page Rank Delta Code lines 3-11*
+Here we construct the basic Elements, `Vertex` and `Edge` with the `element` keyword that will be used by graphit. Note these basic Elements do not have to be named ”Vertex" or "Edge". Most Graph Algorithms will require that you have both of these. GraphIt supports multiple types of user-defined vertices and edges, which is important for algorithms that work on multiple graphs.
 
 [A quick refresher on Variables](http://graphit-lang.org/language#variables)
 
-After defining element types, the programmer can construct vertexsets and edgesets. Lines 3–4 of Fig. 4 show the definitions of an edgeset, edges, and vertexset, vertices. Each element of the edgeset is of Edge type (specified between “{ }”), and the source and destination of the edge is of Vertex type (specified between “( )”). The edgeset declaration supports edges with different types of source and destination vertices (e.g., in a bipartite graph). vertices uses the getVertices method on the edgeset to obtain the union of source and destination vertices of edges. Data for vertices and edges are defined as vectors associated with an element type denoted using the { } syntax (Lines 8–11).
+```
+const edges : edgeset{Edge}(Vertex,Vertex) = load(argv[1]);
+const vertices : vertexset{Vertex} = edges.getVertices();
+```
+
+*vertexset and edgeset definitions*
+
+After defining element types, the programmer can construct vertexsets and edgesets. Lines 3–4 of Fig. 4 show the definitions of an edgeset, `edges`, and vertexset, `vertices`. Each element of the edgeset is of `Edge` type (specified between “{ }”), and the source and destination of the edge is of `Vertex` type (specified between “( )”). The edgeset declaration supports edges with different types of source and destination vertices (e.g., in a bipartite graph). vertices uses the `getVertices()` method on the edgeset, `edges`, to obtain the union of source and destination vertices of edges. The `const` keyword simply says this vertexset, edgeset, or vector is globally accessible. 
+
+```
+const cur_rank : vector{Vertex}(float) = 0;
+const ngh_sum : vector{Vertex}(float) = 0.0;
+const delta : vector{Vertex}(float) = 1.0/vertices.size();
+const out_degree : vector {Vertex}(int) = edges.getOutDegrees();
+```
+*vector definitions*
+
+Data for vertices and edges are defined as vectors associated with an element type denoted using the { } syntax. For example, `cur_rank` is associated with `Vertex`, and is of type `float` (specified in the ( ) parenthesis). This is similar to fields of a struct in C or C++, but is stored as a separate vector. 
+
+When using `export` functions, the edgesets, vertexsets, vectors would need to be explicitly allocated by the user, as documented [here](language#export-functions). 
+
+```
+const damp : float = 0.85;
+const beta_score : float = (1.0-damp)/vertices.size();
+const epsilon2 : float = 0.1;
+const epsilon : float = 0.0000001;
+```
+*scalar definitions*
+
+Lastly, initialize all the scalar values needed for the program. 
+
+Next we move on to take a look at the functions used in the program. 
+
+[A quick refresher on Functions](language#functions)
+
+The algorithm uses three user-defined functions, `updateEdge`, `updateVertexFirstRound`, and `updateVertex`. 
+
+```
+func updateEdge(src : Vertex, dst : Vertex)
+    ngh_sum[dst] += delta[src]/out_degree[src];
+end
+```
+
+`updateEdge` takes in `src` and `dst` of an edge as arguments. The function adds to the current __ngh_sum__ of the destination vertex `dst`, the `delta` divided by the `out_degree` of the source vertex `src`. This function is later used in the main function and applied to every edge in the edgeset. 
 
 
-<img src="gallery/PageRankDeltaFuncs.png" alt="Page Rank Delta Code lines 12-27">
+```
+func updateVertexFirstRound(v : Vertex) -> output : bool
+    delta[v] = damp*(ngh_sum[v]) + beta_score;
+    cur_rank[v] += delta[v];
+    delta[v] = delta[v]-1.0/vertices.size();
+    output = (fabs(delta[v]) > epsilon2*cur_rank[v]);
+    ngh_sum[v] = 0;
+end
+```
 
-*Page Rank Delta Code lines 12-27*
+`updateVertexFirstRound` takes in a vertex, `v`, and returns a boolean. It does this by multiplying the `ngh_sum` with the damping factor and adding the basescore. From this it computes the rank and using the delta it computes whether or not it exceeds a certain threshold. If this threshold is exceeded than it returns a boolean True and if not a boolean False. Then it sets the `ngh_sum` back to 0.
 
-[A quick refresher on Functions](http://graphit-lang.org/language#functions)
+```
+func updateVertex(v : Vertex) -> output : bool
+   delta[v] = ngh_sum[v]*damp;
+   cur_rank[v] += delta[v];
+   ngh_sum[v] = 0;
+   output = fabs(delta[v]) > epsilon2*cur_rank[v];
+end
+```
 
-The algorithm described here uses 3 main functions. 
+`updateVertex` also takes in a vertex and returning a boolean. However in this case it does not add the base score to `delta` when determining Delta. Similarly then by comparing if the delta exceeded the threshold of epilson times the rank it outputs a True or False. 
 
-The first is updateEdge which takes in an edge and adds to the current DeltaSum of the destination, the Delta of the source divided by the amount of out degrees of the source. 
-
-The second function is updateVertexFirstRound that takes in a vertex and returning a boolean. It does this by multiplying the deltasum generated by the function above with the damping factor and adding the basescore. From this it computes the rank and using the delta it computes whether or not it exceeds a certain threshold. If this threshold is exceeded than it returns a boolean True and if not a boolean False. Then it sets the DeltaSum back to 0.
-
-The last function does something similar to above by taking in a vertex and returning a boolean. However in this case it does not add the base score to the deltaSum times damping factor when determining Delta. Similarly then by comparing if the delta exceeded the threshold of epilson times the rank it outputs a True or False. 
-
-The second and last functions will be used later on to filter out the "active vertices". These are the vertices that will used in the next iteration of the algorithm. These active vertices are also known as the frontier. The reason for two functions is that the first time we update the vertexs some additional computation needs to be done as described above that isnt needed later on. Therefore the second function is run only once in the beginning of the algorithm.
+`updateVertexFirstRound` and `updateVertex` will be used later on to filter out the "active vertices". These are the vertices that will used in the next iteration of the algorithm. These active vertices are also known as the frontier. The reason for two functions is that the first time we update the vertexs some additional computation needs to be done as described above that isn't needed later on. Therefore the second function is run only once in the beginning of the algorithm.
 
 
-<img src="gallery/PageRankDeltaMain.png" alt="Page Rank Delta Code lines 28-39">
+```
+func main()
+    var n : int = edges.getVertices();
+    var frontier : vertexset{Vertex} = new vertexset{Vertex}(n);
+    for i in 1:10
+        #s1# edges.from(frontier).apply(updateEdge);
+        var output : vertexset{Vertex};
+        if i == 1
+           output = vertices.filter(updateVertexFirstRound);
+        else
+           output = vertices.filter(updateVertex);
+        end
+        delete frontier;
+        frontier = output;
+    end
+    delete frontier;
+end
+```
+*main function of PageRankDelta*
 
-*Page Rank Delta Code lines 28-39*
+The `main` function is where your program comes together and runs together with all the user-defined functions. Similar to C and C++, you have to explicitly name the function `main`. 
 
-This is where your program comes together and runs together with all the functions you created. What makes GraphIt great is that the language constructs of GraphIt separates edge processing logic from edge traversal, edge filtering (from, to, srcFilter, and dstFilter), atomic synchronization, and modified vertex deduplication and tracking logic (apply and applyModified). This separation enables the compiler to represent the algorithm from a high level, exposing opportunities for edge traversal and vertex data layout optimizations. Moreover, it frees the programmer from specifying low-level implementation details, such as synchronization and deduplication logic. 
+GraphIt is designed to separate edge processing logic from edge traversal, edge filtering (from, to, srcFilter, and dstFilter), atomic synchronization, and modified vertex deduplication and tracking logic (apply and applyModified). This separation enables the compiler to represent the algorithm from a high level, exposing opportunities for edge traversal and vertex data layout optimizations. Moreover, it frees the programmer from specifying low-level implementation details, such as synchronization and deduplication logic. 
 
-The algorithm maintains the set of vertices whose rank has changed greatly from previous iterations. This list of vertices is generated by the vertices.filter in lines 33 to 36. These vertices are known as the Frontier. We start with having all vertices in the frontier(line 29-30). On each iteration we update all the deltasums using the updateEdge function. We use the operator from to obtain the set of edges that we want to operate on. Then we use apply to use a function on them. 
+The algorithm iterates for 10 iterations to update each vertex's `cur_rank` value. The `cur_rank` is assumed to converge after 10 iterations, and represents the importance of each vertex based on its topological structure. In each iteration, the algorithm maintains the set of vertices whose rank has changed greatly from previous iterations, which is known as the `frontier`. We start with having all vertices in the frontier with frontier initalization ( `var frontier : vertexset{Vertex} = new vertexset{Vertex}(n);` ). The frontier generated by   
+`output = vertices.filter(updateVertexFirstRound)`  
+in the first iteration, which applies the `updateVertexFirstRound` function to all the `vertices`. In later iterations the frontier is generated by   
+`output = vertices.filter(updateVertex)`.   
+The user has to explicitly manage the memory and swapping of the frontier with `delete frontier; ` and `frontier = output;`
 
-As you can see in line 32 for all the edges that exist in the frontier we apply updateEdge. Then we generate a new set of vertices that are in the frontier. What Graphit allows us to do is create seperate functions for each part of the algorithm. In this case we have 2 general functions. One that updates the DeltaSum on each vertex and 2 that both determine if a Vertex should be in the Frontier. Then with graphit we can go in and optimize these specific parts functions without actually changing the code. All we need to do is change things in the scheduler. In this example we can modify #s1# and make the program run in parallel. 
+In each iteration we update the `delta` values using the `updateEdge` function in `#s1# edges.from(frontier).apply(updateEdge); `. We use the operator `from` to obtain the set of edges that comes out from the `frontier`. Then we use `apply `to apply the `updateEdge` function on these edges. The label `#s1` is used as a way to identify the edgeset operator for performance tuning using the scheduling. 
 
 
 
@@ -76,21 +206,21 @@ As you can see in line 32 for all the edges that exist in the frontier we apply 
 
 <img src="gallery/PageRankDeltaSchedule.png" alt="Page Rank Delta Schedule">
 
-*Page Rank Delta Code Schedule*
+*PagerankDelta Schedule*
 
-We use labels (#label#) in algorithm specifications to identify the statements on which optimizations apply. Programmers can assign a label on the left side of a statement and later reference it in the scheduling language. Above shows a simple schedule for the PageRankDelta implementation. The programmer adds label s1 to the edgeset operation statement. After the schedule keyword, the programmer can make a series of calls with the scheduling functions.
+We use labels (#label#) in algorithm specifications to identify the statements on which optimizations apply. Programmers can assign a label on the left side of a statement and later reference it in the scheduling language. Above shows a simple schedule for the PageRankDelta implementation. The programmer adds label `s1` to the edgeset operation statement. After the `schedule` keyword, the programmer can make a series of calls with the scheduling functions.
 
-## Tuning
+## Performance Tuning with the Scheduling Language
 
-We designed GraphIt’s scheduling language functions to allow programmers to compose together edge traversal direction, frontier data structure, parallelization, cache optimizations, and NUMA optimizations discussed in the [paper](https://arxiv.org/pdf/1805.00923.pdf). The configApplyDirection functions allow programmers to configure directions used for traversal. The programmer can use the configDenseVertexSet function to switch between bitvector and boolean array for either source or destination vertexset or both. The flexible configApplyNumSSG function configures the number of segmented subgraphs and how the subgraphs are partitioned (fixedvertex-count and edge-aware-vertex-count). 
+We designed GraphIt’s scheduling language functions to allow programmers to compose together edge traversal direction, frontier data structure, parallelization, cache optimizations, and NUMA optimizations discussed in the [paper](https://arxiv.org/pdf/1805.00923.pdf). To compose together different optimizations, the programmer first chooses a direction for traversal. Then the programmer can use the other scheduling functions to pick one option for the parallelization, graph partitioning, NUMA, and dense vertexset optimizations for the current direction. The programmer can configure each direction separately using the optional direction argument for hybrid directions (DensePush-SparsePush or DensePull-SparsePush). If no direction argument is specified, then the configuration applies to both directions.
 
-To compose together different optimizations, the programmer first chooses a direction for traversal. Then the programmer can use the other scheduling functions to pick one option for the parallelization, graph partitioning, NUMA, and dense vertexset optimizations for the current direction. The programmer can configure each direction separately using the optional direction argument for hybrid directions (DensePush-SparsePush or DensePull-SparsePush). If no direction argument is specified, then the configuration applies to both directions.
+We refer users to the [Scheduling Language](language#scheduling-language) section in the language manual for a more comprehensive introduction to performance tuning with the scheduling language. 
 
 Here is a list of Scheduling functions that you can use
 
 <img src="gallery/SchedulingApply.png" alt="Scheduling Functions">
 
-Below we will show how changing the Schedule affects the C++ generated Code. This first section of psuedo code is pageRankDelta code without a schedule.
+Below we will show how changing the Schedule affects the C++ generated Code for PageRankDelta. This first section of psuedo code is pageRankDelta code without a schedule.
 
 <img src="gallery/pageRankDeltaGeneratedCodeDefault.png" alt="Page Rank Delta C++ Generated Code">
 
