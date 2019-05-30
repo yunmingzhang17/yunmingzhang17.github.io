@@ -272,10 +272,11 @@ end
 
 ``` 
 
-### Utility functions 
+### Edgeset Utility Functions 
 
 * __getVertices(): -> output : vertexset{Vertex}__ This returns a vertexset that is the union of source and destination nodes in the edgeset. 
 * __getOutDegrees() -> vector{Vertex}(int):__ This returns a vector of outdegrees for all the vertices in the graph. 
+* __transpose() -> transposed_edgeset : edgeset{Edge}(Vertex, Vertex)__: This returns a transposed edgeset / graph. 
  
 ### combining edgeset operators
 
@@ -338,6 +339,8 @@ export func export_func(input_edges : edgeset{Edge}(Vertex,Vertex))
 end
 ```
 
+NOTE: the export function should NOT be named `main`. The `main` function name is reserved for standalone executable mode. 
+
 If the graph is passed in as argument to the exported function, then the vertexsets and vectors cannot be initialized in the const declarations. This is because the size of the vertexset and edgesets are not known at compile time. In this case, the user would need to manually initialize vertexsets and vectors. If the graph is not loaded in as an argument to the export function, then the user can continue to load the graph, initialize the vertexsets and vectors in const declarations. 
 
 Here we show an example to initilize the vertexsets and vectors when the graph is an input argument to the `export_func`.
@@ -367,7 +370,12 @@ end
 * __serialMinimumSpanningTree(graph : edgeset{Vertex, Vertex, int}, start_vertex : Vertex) -> output : vector{Vertex}(int)__: This function computes a serial Minimum Spanning Tree computation on the weighted graph `graph` from the `start_vertex`. It returns a vector of VertexIDs (integers). This vector contains the parent VertexID for each Vertex v. 
 * __serialSwepCut(g : edgeset{Edge}(Vertex, Vertex), vset : vertexset{Vertex}, val_array : vector{Vertex}(double)) -> output : vertexset{Vertex}__: This function computes a sweep cut on the vertices based on values supplied with the `val_array`, and returns a subset of the vertexset that belongs to one side of the cut. This is an operator for local graph clustering operations as documented [here](https://arxiv.org/abs/1604.07515).  
 * __load(graph_file_name : string) -> output : edgeset{Edge}(Vertex, Vertex)__: This function returns an edgeset loaded from the external file. This can load either an unweighted or weighted file.    
+* __startTimer()__: This function starts the timer. 
+* __stopTimer()__ -> elapsed_time : float__: This function stops the timer and returns the elapsed time in floats
+* __fabs()__: This function returns the absolute value of a float. 
+* __atoi()__: This function converts a string to an integer. 
 
+__NOTE__: If you need some library routine that is not included in the list, you can use the [extern functions](language#extern-functions) to provide your customized functionalities. 
 
 # Scheduling Language
 
