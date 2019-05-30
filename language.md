@@ -173,7 +173,7 @@ const age : vector {Person}(int) = 0;
 
 ```
 
-
+For vector for vertices, the user can access with a vertexid, in this case `age[v]`. For vector for edges, the user need to access with both src and destinaton vertexids, `edge_vector[src,dst]`.
 
 
 ## Edgesets
