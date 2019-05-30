@@ -272,10 +272,11 @@ end
 
 ``` 
 
-### Utility functions 
+### Edgeset Utility Functions 
 
 * __getVertices(): -> output : vertexset{Vertex}__ This returns a vertexset that is the union of source and destination nodes in the edgeset. 
 * __getOutDegrees() -> vector{Vertex}(int):__ This returns a vector of outdegrees for all the vertices in the graph. 
+* __transpose() -> transposed_edgeset : edgeset{Edge}(Vertex, Vertex)__: This returns a transposed edgeset / graph. 
  
 ### combining edgeset operators
 

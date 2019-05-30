@@ -75,7 +75,7 @@
           <li><a href="#srcfilter-and-dstfilter" id="markdown-toc-srcfilter-and-dstfilter">srcFilter and dstFilter</a></li>
           <li><a href="#apply" id="markdown-toc-apply">apply</a></li>
           <li><a href="#applymodified" id="markdown-toc-applymodified">applyModified</a></li>
-          <li><a href="#utility-functions" id="markdown-toc-utility-functions">Utility functions</a></li>
+          <li><a href="#edgeset-utility-functions" id="markdown-toc-edgeset-utility-functions">Edgeset Utility Functions</a></li>
           <li><a href="#combining-edgeset-operators" id="markdown-toc-combining-edgeset-operators">combining edgeset operators</a></li>
         </ul>
       </li>
@@ -335,11 +335,12 @@ end
 
 </code></pre></div></div>
 
-<h3 id="utility-functions">Utility functions</h3>
+<h3 id="edgeset-utility-functions">Edgeset Utility Functions</h3>
 
 <ul>
   <li><strong>getVertices(): -&gt; output : vertexset{Vertex}</strong> This returns a vertexset that is the union of source and destination nodes in the edgeset.</li>
   <li><strong>getOutDegrees() -&gt; vector{Vertex}(int):</strong> This returns a vector of outdegrees for all the vertices in the graph.</li>
+  <li><strong>transpose() -&gt; transposed_edgeset : edgeset{Edge}(Vertex, Vertex)</strong>: This returns a transposed edgeset / graph.</li>
 </ul>
 
 <h3 id="combining-edgeset-operators">combining edgeset operators</h3>
