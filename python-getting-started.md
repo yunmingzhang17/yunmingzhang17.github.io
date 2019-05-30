@@ -277,7 +277,7 @@ Before you can run the code above you need to first follow these steps and build
 Before we start building GraphIt we need to make sure we have all the dependencies installed. Currently GraphIt requires the following packages to be installed - 
 1. cmake (version >= 3.5)
 2. g++ (version >= 5.4)
-3. python 2.7 (for running test cases)
+3. python 2.7 or Python 3.x (for running basic test cases)
 4. python 3.x (x >= 5, for python bindings)
 5. pybind11
 6. scipy 
@@ -302,11 +302,11 @@ To run the Python end-to-end test suite:
 
 start at the top level graphit directory cloned from Github, NOT the build directory
 (All tests would pass, but some would generate error messages from the g++ compiler. This is expected.)
-Currently the project supports Python 2.x for the basic tests and Python 3.x (x >= 5) for the pybind test cases
+Currently the project supports Python 2.x and Python 3 for the basic tests (test.py and test_with_schedules.py) and Python 3.x (x >= 5) for the pybind test cases (pybind_test.py), which use scipy. 
 ``` 
 cd build
-python2 python_tests/test.py
-python2 python_tests/test_with_schedules.py
+python python_tests/test.py
+python python_tests/test_with_schedules.py
 export PYTHONPATH=.
 python3 python_tests/pybind_test.py 
 ```
