@@ -339,6 +339,8 @@ export func export_func(input_edges : edgeset{Edge}(Vertex,Vertex))
 end
 ```
 
+NOTE: the export function should NOT be named `main`. The `main` function name is reserved for standalone executable mode. 
+
 If the graph is passed in as argument to the exported function, then the vertexsets and vectors cannot be initialized in the const declarations. This is because the size of the vertexset and edgesets are not known at compile time. In this case, the user would need to manually initialize vertexsets and vectors. If the graph is not loaded in as an argument to the export function, then the user can continue to load the graph, initialize the vertexsets and vectors in const declarations. 
 
 Here we show an example to initilize the vertexsets and vectors when the graph is an input argument to the `export_func`.
