@@ -173,7 +173,7 @@ const age : vector {Person}(int) = 0;
 
 ```
 
-
+For vector for vertices, the user can access with a vertexid, in this case `age[v]`. For vector for edges, the user need to access with both src and destinaton vertexids, `edge_vector[src,dst]`.
 
 
 ## Edgesets
@@ -271,6 +271,11 @@ func main()
 end
 
 ``` 
+
+### Utility functions 
+
+* __getVertices(): -> output : vertexset{Vertex}__ This returns a vertexset that is the union of source and destination nodes in the edgeset. 
+* __getOutDegrees() -> vector{Vertex}(int):__ This returns a vector of outdegrees for all the vertices in the graph. 
  
 ### combining edgeset operators
 
@@ -355,11 +360,14 @@ end
 
 ```
 
-# Library Rountines 
+# Library Functions 
 
-* __getRandomOutNgh(v: Vertex)__: Returns a random outgoing neighbor of the Vertex v. 
-* __getRandomInNgh(v: Vertex)__: Returns a random incoming neighbor of the Vertex v. 
-* __serialMinimumSpanningTree(graph : edgeset{Vertex, Vertex, int}, start_vertex : Vertex)__: This operator computes a serial Minimum Spanning Tree computation on the weighted graph `graph` from the `start_vertex`. It returns a vector of VertexIDs (integers). This vector contains the parent VertexID for each Vertex v. 
+* __getRandomOutNgh(v: Vertex)__: This function returns a random outgoing neighbor of the Vertex v. 
+* __getRandomInNgh(v: Vertex)__: This function returns a random incoming neighbor of the Vertex v. 
+* __serialMinimumSpanningTree(graph : edgeset{Vertex, Vertex, int}, start_vertex : Vertex) -> output : vector{Vertex}(int)__: This function computes a serial Minimum Spanning Tree computation on the weighted graph `graph` from the `start_vertex`. It returns a vector of VertexIDs (integers). This vector contains the parent VertexID for each Vertex v. 
+* __serialSwepCut(g : edgeset{Edge}(Vertex, Vertex), vset : vertexset{Vertex}, val_array : vector{Vertex}(double)) -> output : vertexset{Vertex}__: This function computes a sweep cut on the vertices based on values supplied with the `val_array`, and returns a subset of the vertexset that belongs to one side of the cut. This is an operator for local graph clustering operations as documented [here](https://arxiv.org/abs/1604.07515).  
+* __load(graph_file_name : string) -> output : edgeset{Edge}(Vertex, Vertex)__: This function returns an edgeset loaded from the external file. This can load either an unweighted or weighted file.    
+
 
 # Scheduling Language
 

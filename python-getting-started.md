@@ -274,6 +274,14 @@ To learn how to use the scheduling functions with GraphIt, please visit the [sch
 Before you can run the code above you need to first follow these steps and build GraphIt
 
 ### Build Graphit
+Before we start building GraphIt we need to make sure we have all the dependencies installed. Currently GraphIt requires the following packages to be installed - 
+1. cmake (version >= 3.5)
+2. g++ (version >= 5.4)
+3. python 2.7 (for running test cases)
+4. python 3.x (x >= 5, for python bindings)
+5. pybind11
+6. scipy 
+
 
 To perform an out-of-tree build of Graphit do:
 
