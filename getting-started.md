@@ -16,7 +16,7 @@ This guide introduces GraphIt language features with the PagerankDelta algorithm
 ## Downloading software
 Make sure you have all the correct Open Source Software installed. First follow the [README](https://github.com/yunmingzhang17/graphit) file here to clone and install graphIt. You will need either CILK or OPENMP to allow you to run the C++ code in parallel. If you dont have either you can get both by simply downloading [GCC](https://gcc.gnu.org/). Alternatively if you already have CILK or OPENMP you can use those too. This tutorial will go through how to use GraphIt via both CILK and OPENMP.
         
-## Cloning graphit
+## Cloning GraphIt
 Clone graphit by going to [GraphIt](https://github.com/yunmingzhang17/graphit)
         *Something to note for the following tutorial.*
         *Everything will be done graphit/build/bin*
@@ -84,7 +84,7 @@ Here we will go through an example of GraphIt Code using Page Rank Delta as an e
 
 Additionally here is a link to the [GraphIt OOPSLA18 paper](https://dl.acm.org/citation.cfm?id=3276491) or [the arxiv report here](https://arxiv.org/pdf/1805.00923.pdf).  Sections 4 and 5 give the complete breakdown of the Page Rank Delta code. Please look here if you want a more detailed breakdown of the functionality of Graphit.
 
-###      Algorithm Explanatation
+###      Algorithm Explanation
 ```
 element Vertex end
 element Edge end
@@ -92,7 +92,7 @@ element Edge end
 
 _element definitions_
 
-Here we construct the basic Elements, `Vertex` and `Edge` with the `element` keyword that will be used by graphit. Note these basic Elements do not have to be named ”Vertex" or "Edge". Most Graph Algorithms will require that you have both of these. GraphIt supports multiple types of user-defined vertices and edges, which is important for algorithms that work on multiple graphs.
+Here we construct the basic Elements, `Vertex` and `Edge` with the `element` keyword that will be used by GraphIt. Note these basic Elements do not have to be named ”Vertex" or "Edge". Most Graph Algorithms will require that you have both of these. GraphIt supports multiple types of user-defined vertices and edges, which is important for algorithms that work on multiple graphs.
 
 [A quick refresher on Variables](http://graphit-lang.org/language#variables)
 
@@ -236,7 +236,7 @@ edges.from(frontier).apply(updateEdge)
 
 <img src="gallery/pageRankDeltaGeneratedCodeDynamic.png" alt="Page Rank Delta C++ Generated Code">
 
-*Here by adding to the schedule the generated C++ is capable of running in parallel on multiple cores at once. This is seen by the parallel_for loop in the code and if that loop is run using CILK or OPENMV then it being run on mulitple cores will make the program much faster.*
+*Here by adding to the schedule the generated C++ is capable of running in parallel on multiple cores at once. This is seen by the parallel_for loop in the code and if the loop is run using CILK or OPENMV then it uses mulitple cores.*
 
 <img src="gallery/pageRankDeltaGeneratedCodeBitVector.png" alt="Page Rank Delta C++ Generated Code">
 
@@ -246,11 +246,11 @@ edges.from(frontier).apply(updateEdge)
 
 ## Compiling
 
-Before we can compile Graphit you need to first follow these steps and build the bin for the program
+Before we can compile GraphIt you need to first follow these steps and build the bin for the program
 
-### Build Graphit
+### Build GraphIt
 
-To perform an out-of-tree build of Graphit do:
+To perform an out-of-tree build of GraphIt do:
 
 After you have cloned the directory:
 ```

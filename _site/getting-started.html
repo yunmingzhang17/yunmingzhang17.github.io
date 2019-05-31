@@ -51,16 +51,16 @@
 <ul id="markdown-toc">
   <li><a href="#getting-started" id="markdown-toc-getting-started">Getting Started</a>    <ul>
       <li><a href="#downloading-software" id="markdown-toc-downloading-software">Downloading software</a></li>
-      <li><a href="#cloning-graphit" id="markdown-toc-cloning-graphit">Cloning graphit</a></li>
+      <li><a href="#cloning-graphit" id="markdown-toc-cloning-graphit">Cloning GraphIt</a></li>
       <li><a href="#basic-variables-constructs-and-functions" id="markdown-toc-basic-variables-constructs-and-functions">Basic Variables, Constructs, and Functions</a>        <ul>
           <li><a href="#pagerankdelta-example" id="markdown-toc-pagerankdelta-example">PageRankDelta Example</a></li>
-          <li><a href="#algorithm-explanatation" id="markdown-toc-algorithm-explanatation">Algorithm Explanatation</a></li>
+          <li><a href="#algorithm-explanation" id="markdown-toc-algorithm-explanation">Algorithm Explanation</a></li>
           <li><a href="#scheduling-explanatation" id="markdown-toc-scheduling-explanatation">Scheduling Explanatation</a></li>
         </ul>
       </li>
       <li><a href="#performance-tuning-with-the-scheduling-language" id="markdown-toc-performance-tuning-with-the-scheduling-language">Performance Tuning with the Scheduling Language</a></li>
       <li><a href="#compiling" id="markdown-toc-compiling">Compiling</a>        <ul>
-          <li><a href="#build-graphit" id="markdown-toc-build-graphit">Build Graphit</a></li>
+          <li><a href="#build-graphit" id="markdown-toc-build-graphit">Build GraphIt</a></li>
           <li><a href="#compile-graphit-programs" id="markdown-toc-compile-graphit-programs">Compile GraphIt Programs</a></li>
           <li><a href="#compiling-and-using-graphit" id="markdown-toc-compiling-and-using-graphit">Compiling and Using GraphIt</a></li>
         </ul>
@@ -72,7 +72,7 @@
 <h2 id="downloading-software">Downloading software</h2>
 <p>Make sure you have all the correct Open Source Software installed. First follow the <a href="https://github.com/yunmingzhang17/graphit">README</a> file here to clone and install graphIt. You will need either CILK or OPENMP to allow you to run the C++ code in parallel. If you dont have either you can get both by simply downloading <a href="https://gcc.gnu.org/">GCC</a>. Alternatively if you already have CILK or OPENMP you can use those too. This tutorial will go through how to use GraphIt via both CILK and OPENMP.</p>
 
-<h2 id="cloning-graphit">Cloning graphit</h2>
+<h2 id="cloning-graphit">Cloning GraphIt</h2>
 <p>Clone graphit by going to <a href="https://github.com/yunmingzhang17/graphit">GraphIt</a>
         <em>Something to note for the following tutorial.</em>
         <em>Everything will be done graphit/build/bin</em></p>
@@ -139,14 +139,14 @@ end
 
 <p>Additionally here is a link to the <a href="https://dl.acm.org/citation.cfm?id=3276491">GraphIt OOPSLA18 paper</a> or <a href="https://arxiv.org/pdf/1805.00923.pdf">the arxiv report here</a>.  Sections 4 and 5 give the complete breakdown of the Page Rank Delta code. Please look here if you want a more detailed breakdown of the functionality of Graphit.</p>
 
-<h3 id="algorithm-explanatation">Algorithm Explanatation</h3>
+<h3 id="algorithm-explanation">Algorithm Explanation</h3>
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>element Vertex end
 element Edge end
 </code></pre></div></div>
 
 <p><em>element definitions</em></p>
 
-<p>Here we construct the basic Elements, <code class="highlighter-rouge">Vertex</code> and <code class="highlighter-rouge">Edge</code> with the <code class="highlighter-rouge">element</code> keyword that will be used by graphit. Note these basic Elements do not have to be named ”Vertex” or “Edge”. Most Graph Algorithms will require that you have both of these. GraphIt supports multiple types of user-defined vertices and edges, which is important for algorithms that work on multiple graphs.</p>
+<p>Here we construct the basic Elements, <code class="highlighter-rouge">Vertex</code> and <code class="highlighter-rouge">Edge</code> with the <code class="highlighter-rouge">element</code> keyword that will be used by GraphIt. Note these basic Elements do not have to be named ”Vertex” or “Edge”. Most Graph Algorithms will require that you have both of these. GraphIt supports multiple types of user-defined vertices and edges, which is important for algorithms that work on multiple graphs.</p>
 
 <p><a href="http://graphit-lang.org/language#variables">A quick refresher on Variables</a></p>
 
@@ -279,7 +279,7 @@ edges.from(frontier).apply(updateEdge)
 
 <p><img src="gallery/pageRankDeltaGeneratedCodeDynamic.png" alt="Page Rank Delta C++ Generated Code" /></p>
 
-<p><em>Here by adding to the schedule the generated C++ is capable of running in parallel on multiple cores at once. This is seen by the parallel_for loop in the code and if that loop is run using CILK or OPENMV then it being run on mulitple cores will make the program much faster.</em></p>
+<p><em>Here by adding to the schedule the generated C++ is capable of running in parallel on multiple cores at once. This is seen by the parallel_for loop in the code and if the loop is run using CILK or OPENMV then it uses mulitple cores.</em></p>
 
 <p><img src="gallery/pageRankDeltaGeneratedCodeBitVector.png" alt="Page Rank Delta C++ Generated Code" /></p>
 
@@ -287,11 +287,11 @@ edges.from(frontier).apply(updateEdge)
 
 <h2 id="compiling">Compiling</h2>
 
-<p>Before we can compile Graphit you need to first follow these steps and build the bin for the program</p>
+<p>Before we can compile GraphIt you need to first follow these steps and build the bin for the program</p>
 
-<h3 id="build-graphit">Build Graphit</h3>
+<h3 id="build-graphit">Build GraphIt</h3>
 
-<p>To perform an out-of-tree build of Graphit do:</p>
+<p>To perform an out-of-tree build of GraphIt do:</p>
 
 <p>After you have cloned the directory:</p>
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>                cd graphit

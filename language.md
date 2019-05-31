@@ -177,13 +177,12 @@ For vector for vertices, the user can access with a vertexid, in this case `age[
 
 
 ## Edgesets
-Edgesets are have connectivity information. In particular, edge
+Edgesets have connectivity information. In particular, edge
 set definitions specify the type of elements from which each edge's endpoints come.
-The following declares a set of spring elements that each connect two points
-from the `edges` set:
+The following declares a set of `Edge` element that each connect two `Person` type points from the `edges` edgeset:
 
 ```
-const edges : edgeset{Follow}(Person,Person);
+const edges : edgeset{Edge}(Person,Person);
 ```
 
 There is no explicit graph type in GraphIt; rather, graphs are formed implicitly
@@ -206,7 +205,7 @@ const people : vertexset{Person} = edges.getVertices();
 
 
 ### from, to and filter 
-`from` and `to` Filters out edges whose source vertex is in the input set. 
+`from` and `to` filters out edges whose source vertex is in the input set. 
 
 ```
 const people_age_over_40 : vertexset{Person} = ... 
@@ -257,7 +256,7 @@ end
 ```
 
 ### applyModified
-This operator applies a function (`updateEdge`) to every edge. Returns a vertexset that contains destination vertices whose entry in the vector has been modified in `updateEdge`. The programmer can optionally disable deduplication within modfieid vertices. Deduplication is enabled by default.
+This operator applies a function (`updateEdge`) to every edge. Returns a vertexset that contains destination vertices whose entry in the vector has been modified in `updateEdge`. The programmer can optionally disable deduplication within modified vertices. Deduplication is enabled by default.
 
 ```
 func updateEdge(src : Vertex, dst : Vertex)
@@ -299,7 +298,7 @@ The apply operator is similar to the edgeset apply operator, but applied to a ve
 
 The users can call functions implemented in C++ from GraphIt. These can be used in cases where the user needs some external functionalities that are not currently supported in the GraphIt language. For example, certain solvers or more complex operations that are not necessarily related to graphs. Another example could be a distance estimator used in AStar search. 
 
-The user needs to define a prototype of the function in the GraphIt program with the `extern` keyworkd. The example below defined a extern function named `extern_func` that takes as input a vertex and outputs a double. 
+The user needs to define a prototype of the function in the GraphIt program with the `extern` keyword. The example below defined a extern function named `extern_func` that takes as input a vertex and outputs a double. 
 ```
 extern func extern_func(v: Vertex) -> output:double; 
 ```
@@ -368,7 +367,7 @@ end
 * __getRandomOutNgh(v: Vertex)__: This function returns a random outgoing neighbor of the Vertex v. 
 * __getRandomInNgh(v: Vertex)__: This function returns a random incoming neighbor of the Vertex v. 
 * __serialMinimumSpanningTree(graph : edgeset{Vertex, Vertex, int}, start_vertex : Vertex) -> output : vector{Vertex}(int)__: This function computes a serial Minimum Spanning Tree computation on the weighted graph `graph` from the `start_vertex`. It returns a vector of VertexIDs (integers). This vector contains the parent VertexID for each Vertex v. 
-* __serialSwepCut(g : edgeset{Edge}(Vertex, Vertex), vset : vertexset{Vertex}, val_array : vector{Vertex}(double)) -> output : vertexset{Vertex}__: This function computes a sweep cut on the vertices based on values supplied with the `val_array`, and returns a subset of the vertexset that belongs to one side of the cut. This is an operator for local graph clustering operations as documented [here](https://arxiv.org/abs/1604.07515).  
+* __serialSweepCut(g : edgeset{Edge}(Vertex, Vertex), vset : vertexset{Vertex}, val_array : vector{Vertex}(double)) -> output : vertexset{Vertex}__: This function computes a sweep cut on the vertices based on values supplied with the `val_array`, and returns a subset of the vertexset that belongs to one side of the cut. This is an operator for local graph clustering operations as documented [here](https://arxiv.org/abs/1604.07515).  
 * __load(graph_file_name : string) -> output : edgeset{Edge}(Vertex, Vertex)__: This function returns an edgeset loaded from the external file. This can load either an unweighted or weighted file.    
 * __startTimer()__: This function starts the timer. 
 * __stopTimer()__ -> elapsed_time : float__: This function stops the timer and returns the elapsed time in floats
