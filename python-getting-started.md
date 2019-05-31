@@ -17,7 +17,7 @@ This tutorial is broadly devided in the following sections -
 ## Downloading software
 Make sure you have all the correct Open Source Software installed. First follow the [README](https://github.com/yunmingzhang17/graphit) file here to clone and install graphIt. You will need either CILK or OPENMP to allow you to run the C++ code in parallel. If you dont have either you can get both by simply downloading [GCC](https://gcc.gnu.org/). Alternatively if you already have CILK or OPENMP you can use those too. This tutorial will go through how to use GraphIt via both CILK and OPENMP.
         
-## Cloning graphit
+## Cloning GraphIt
 Clone graphit by going to [GraphIt](https://github.com/yunmingzhang17/graphit)
         *Something to note for the following tutorial.*
         *Everything will be done graphit/build/bin*
@@ -104,7 +104,7 @@ end
 
 Here we will go through an example of writing GraphIt code for the Page Rank Delta application and then calling it from python using the python bindings. You can find the code used in this example along with a few other applicaitons under graphit/apps directory [here](https://github.com/yunmingzhang17/graphit/tree/master/apps). 
 
-Additionally here is a link to the [GraphIt OOPSLA18 paper](https://dl.acm.org/citation.cfm?id=3276491) or [the arxiv report here](https://arxiv.org/pdf/1805.00923.pdf).  Sections 4 and 5 give the complete breakdown of the Page Rank Delta code. Please look here if you want a more detailed breakdown of the functionality of Graphit.
+Additionally here is a link to the [GraphIt OOPSLA18 paper](https://dl.acm.org/citation.cfm?id=3276491) or [the arxiv report here](https://arxiv.org/pdf/1805.00923.pdf).  Sections 4 and 5 give the complete breakdown of the Page Rank Delta code. Please look here if you want a more detailed breakdown of the functionality of GraphIt.
 
 ###      Algorithm Explanatation
 ```
@@ -273,7 +273,7 @@ To learn how to use the scheduling functions with GraphIt, please visit the [sch
 
 Before you can run the code above you need to first follow these steps and build GraphIt
 
-### Build Graphit
+### Build GraphIt
 Before we start building GraphIt we need to make sure we have all the dependencies installed. Currently GraphIt requires the following packages to be installed - 
 1. cmake (version >= 3.5)
 2. g++ (version >= 5.4)
@@ -351,7 +351,7 @@ python3 pagerank_delta.py <path/to/graph.mtx>
 
 If everything runs properly, this will output the time elapsed for computation. 
 
-### Fix if python3 cannot find graphit
+### Fix if python3 cannot find GraphIt
 
 The build directory of Graphit is added to your PYTHONPATH already, but just in case the above command gives an error messsage like - 
 ```
