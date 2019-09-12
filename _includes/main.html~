@@ -8,18 +8,21 @@
 
   <div class="post-content">
     <table border="0" cellpadding="0">
-<td valign="top" style="min-width:140px;">
-<img src="/assets/fred.jpg" width="160" />
-<!-- ![Fredrik Kjolstad](/assets/yunming_personal.JPG){:style="float:left; margin-right:7px; margin-top:7px; width:160px"} -->
-</td>
-<td valign="top">
-PhD Candidate<br />
-Computer Science and Artificial Intelligence Laboratory<br />
-Department of Electrical Engineering and Computer Science<br />
-Massachusetts Institute of Technology<br />
-<a href="mailto:fred@csail.mit.edu">fred@csail.mit.edu</a><br />
-<a href="/assets/kjolstad-cv.pdf">Curriculum Vitae</a>
-</td>
+      <tr>
+	<td>
+	  <img src="/assets/yunming_personal.jpg" width="160" />
+	  <!-- ![Fredrik Kjolstad](/assets/yunming_personal.JPG){:style="float:left; margin-right:7px; margin-top:7px; width:160px"} -->
+	</td>
+	<td >
+	  PhD Candidate<br />
+	  Computer Science and Artificial Intelligence Laboratory<br />
+	  Department of Electrical Engineering and Computer Science<br />
+	  Massachusetts Institute of Technology<br />
+	  <a href="https://yunmingzhang.wordpress.com">My Technical Blog</a><br />
+	  <a href="mailto:yunming@mit.edu">yunming at mit dot edu</a><br />
+	  <a href="/assets/yunming-cv.pdf">Curriculum Vitae</a>
+	</td>
+      </tr>
 </table>
 
 <p>I aim to make it easy to program sparse computing applications that can run
