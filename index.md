@@ -7,10 +7,3 @@
 #
 layout: home
 ---
-
-
-PhD Candidate MIT 
-
-Email: yunming at mit dot edu 
-
-

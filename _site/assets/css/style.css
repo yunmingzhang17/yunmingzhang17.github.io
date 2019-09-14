@@ -66,6 +66,10 @@ li > ul,
 li > ol {
   margin-bottom: 0; }
 
+tableheading {
+  font-size: 10 px;
+  font-weight: 400; }
+
 /**
  * Headings
  */
@@ -173,17 +177,21 @@ table {
   text-align: left;
   color: #3f3f3f;
   border-collapse: collapse;
-  border: 1px solid #e8e8e8; }
-  table tr:nth-child(even) {
-    background-color: #f7f7f7; }
+  border: None; }
+  table tr {
+    /*&:nth-child(even) {
+      background-color: lighten($grey-color-light, 6%);
+    }*/ }
   table th, table td {
-    padding: 10px 15px; }
+    padding: 10px 15px;
+    border: none;
+    outline: none; }
   table th {
     background-color: #f0f0f0;
     border: 1px solid #dedede;
     border-bottom-color: #c9c9c9; }
   table td {
-    border: 1px solid #e8e8e8; }
+    border: none; }
 
 /**
  * Site header
